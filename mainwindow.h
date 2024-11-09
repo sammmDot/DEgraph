@@ -25,7 +25,7 @@ public:
     void GuardaEcu();                       // Valida y guardan las ecuación
     QString Confirmarm();                   // Valida el minimo
     QString ConfirmarM();                   // Valida el maximo
-    void GuardarMm(QString m, QString M);   // Guardar el maximo y el minimo
+    void GuardarMm();                       // Guardar el maximo y el minimo
     void GuardarSub();                      // Valida y guardan las subdivisiones
 
 private slots:
