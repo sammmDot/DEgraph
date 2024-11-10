@@ -158,7 +158,7 @@ void MainWindow::GuardarMm(){
         }
     }                                                                                       
 }
-}
+
 
 // Validacion y guardado de la variable de la subdivision
 void MainWindow::GuardarSub(){
