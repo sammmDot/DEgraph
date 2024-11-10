@@ -202,10 +202,7 @@ void MainWindow::Ejecutar() {
     GuardarSub();
 
     // Validar y guardar el mínimo y el máximo
-    qDebug() << "Ejecutar() - validar mínimo y máximo...";
-    QString m = Confirmarm();
-    QString M = ConfirmarM();
-    qDebug() << "Ejecutar() - Guardando mínimo y máximo...";
+    qDebug() << "Ejecutar() - Validar y guardando mínimo y máximo...";
     GuardarMm(m, M);
 
     qDebug() << "Ejecutar() - Fin de la función Ejecutar";
