@@ -142,15 +142,22 @@ QString MainWindow::ConfirmarM(){
 }
 
 // Funciones para guardar las variables del minimo y el maximo
-void MainWindow::GuardarMm(QString m, QString M){
+void MainWindow::GuardarMm(){                                                                    
+    QString m = Confirmarm();                                                                
+    QString M = ConfirmarM();           
     if(m<M){
         // m siempre tiene que ser menor que que M
         Guardarm =m;   // Guardar la minimo en la variable de .h
         GuardarM =M;  // Guardar la maximo en la variable de .h
-    }else{
-        // M es menor que m
-        QMessageBox::warning(this, "Error", "Hay un problema en el maximo y el minimo. Por favor,el minimo no puede ser mayor o igual que el maximo.");
-    }
+    }else{                                                                                 
+        if(M==""||m==""){
+            return;
+        }else{
+            // M es menor que m
+            QMessageBox::warning(this, "Error", "Hay un problema en el maximo y el minimo. Por favor,el minimo no puede ser mayor o igual que el maximo.");
+        }
+    }                                                                                       
+}
 }
 
 // Validacion y guardado de la variable de la subdivision
