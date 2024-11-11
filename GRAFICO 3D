@@ -1,0 +1,197 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <GL/glut.h>  // Añadir GLUT para dibujar texto
+#include <cmath>
+#include <string>
+#include <vector>
+#include <iostream>
+
+// Estructura para almacenar puntos 3D
+struct Point {
+    float x, y, z;
+};
+
+// Vector para almacenar los puntos que el usuario ingresará
+std::vector<Point> userPoints;
+
+// Función para dibujar texto en las coordenadas 3D
+void drawText(const char* text, float x, float y, float z) {
+    glRasterPos3f(x, y, z);  // Posición donde queremos colocar el texto
+    for (const char* c = text; *c != '\0'; c++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);  // Usar fuente bitmap
+    }
+}
+
+// Configuración del viewport y la cámara
+void setupViewport(GLFWwindow* window) {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(30.0, (double)width / height, 1.0, 100.0);
+}
+
+// Función para dibujar los ejes de coordenadas con marcas numéricas
+void drawAxes() {
+    glBegin(GL_LINES);
+
+    // Eje X - Rojo
+    glColor3f(1.0f, 0.0f, 0.0f);  // Rojo para el eje X
+    glVertex3f(-100.0f, 0.0f, 0.0f);
+    glVertex3f(100.0f, 0.0f, 0.0f);
+
+    // Eje Y - Verde
+    glColor3f(0.0f, 1.0f, 0.0f);  // Verde para el eje Y
+    glVertex3f(0.0f, -100.0f, 0.0f);
+    glVertex3f(0.0f, 100.0f, 0.0f);
+
+    // Eje Z - Azul
+    glColor3f(0.0f, 0.0f, 1.0f);  // Azul para el eje Z
+    glVertex3f(0.0f, 0.0f, -100.0f);
+    glVertex3f(0.0f, 0.0f, 100.0f);
+
+    glEnd();
+
+    // Dibujar marcas y valores en los ejes
+    for (int i = -10; i <= 10; i++) {
+        std::string label = std::to_string(i * 10);
+
+        // Marcas y valores en el eje X
+        glColor3f(0.0f, 0.0f, 0.0f);
+        drawText(label.c_str(), i * 10, -1.0f, 0.0f);  // Texto ligeramente debajo del eje X
+
+        // Marcas y valores en el eje Y
+        drawText(label.c_str(), -2.0f, i * 10, 0.0f);  // Texto ligeramente a la izquierda del eje Y
+
+        // Marcas y valores en el eje Z
+        drawText(label.c_str(), 0.0f, -1.0f, i * 10);  // Texto ligeramente detrás del eje Z
+    }
+}
+
+// Función para graficar la curva paramétrica (helicoidal)
+void renderParametricCurve() {
+    glColor3f(0.0f, 0.0f, 0.0f);  // Líneas de la curva en color negro
+    glBegin(GL_LINE_STRIP);  // Dibujar una curva con líneas conectadas
+    for (float t = -100; t < 10 * M_PI; t += 0.05) {
+        float x = t * 0.5;
+        float y = sin(t);
+        float z = cos(t);  // Hélice simple
+        glVertex3f(x, y, z);
+    }
+    glEnd();
+}
+
+// Función para graficar y = x^2
+void renderQuadraticCurve() {
+    glColor3f(0.0f, 0.5f, 1.0f);  // Curva en color azul claro
+    glBegin(GL_LINE_STRIP);  // Dibujar una curva con líneas conectadas
+    for (float x = -10.0f; x <= 10.0f; x += 0.1f) {
+        float y = x * x;  // y = x^2
+        glVertex3f(x * 10, y * 10, 0.0f);  // Ampliando la escala de la curva
+    }
+    glEnd();
+}
+
+// Función para graficar los puntos dados por el usuario
+void renderUserPoints() {
+    glColor3f(1.0f, 0.0f, 0.0f);  // Puntos en color rojo
+    glPointSize(5.0f);  // Tamaño de los puntos
+    glBegin(GL_POINTS);
+    for (const auto& point : userPoints) {
+        glVertex3f(point.x, point.y, point.z);
+    }
+    glEnd();
+}
+
+// Función para calcular y graficar la distancia entre dos puntos
+void renderDistanceBetweenPoints(const Point& p1, const Point& p2) {
+    // Dibujar una línea entre los dos puntos
+    glColor3f(0.0f, 0.0f, 1.0f);  // Línea en color azul
+    glBegin(GL_LINES);
+    glVertex3f(p1.x, p1.y, p1.z);
+    glVertex3f(p2.x, p2.y, p2.z);
+    glEnd();
+
+    // Calcular la distancia Euclidiana
+    float distance = sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2) + pow(p2.z - p1.z, 2));
+
+    // Mostrar la distancia en el punto medio entre los dos puntos
+    std::string distanceText = "Distancia: " + std::to_string(distance);
+    drawText(distanceText.c_str(), (p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2);
+}
+
+int main() {
+    // Solicitar puntos al usuario
+    int numPoints;
+    std::cout << "¿Cuántos puntos quieres graficar (al menos 2)?: ";
+    std::cin >> numPoints;
+
+    if (numPoints < 2) {
+        std::cout << "Debes ingresar al menos 2 puntos." << std::endl;
+        return -1;
+    }
+
+    for (int i = 0; i < numPoints; i++) {
+        Point p;
+        std::cout << "Ingresa las coordenadas del punto " << i + 1 << " (x y z): ";
+        std::cin >> p.x >> p.y >> p.z;
+        userPoints.push_back(p);
+    }
+
+    // Inicializar GLFW
+    if (!glfwInit()) {
+        return -1;
+    }
+
+    // Crear ventana
+    GLFWwindow* window = glfwCreateWindow(1000, 1000, "GRAFICO TERRIBLE CHORO", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+    glewInit();  // Inicializar GLEW
+
+    glEnable(GL_DEPTH_TEST);  // Habilitar prueba de profundidad
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);  // Fondo blanco
+
+    // Inicializar GLUT para dibujar texto
+    int argc = 1;
+    char* argv[1] = {const_cast<char*>("dummy")};
+    glutInit(&argc, argv);
+
+    // Ciclo de renderizado
+    while (!glfwWindowShouldClose(window)) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Limpiar el buffer de color y profundidad
+
+        setupViewport(window);  // Configurar la vista
+
+        // Configurar la cámara
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -30.0f);  // Alejar la cámara en Z
+        glRotatef(30.0f, 1.0f, 0.0f, 0.0f);  // Rotar 30 grados en el eje X
+        glRotatef(-30.0f, 0.0f, 1.0f, 0.0f);  // Rotar 30 grados en el eje Y
+
+        // Dibujar ejes, curva paramétrica, puntos del usuario y y = x^2
+        drawAxes();
+        renderParametricCurve();
+        renderQuadraticCurve();
+        renderUserPoints();
+
+        // Graficar la distancia entre los dos primeros puntos
+        if (userPoints.size() >= 2) {
+            renderDistanceBetweenPoints(userPoints[0], userPoints[1]);
+        }
+
+        glfwSwapBuffers(window);  // Intercambiar buffers
+        glfwPollEvents();  // Procesar eventos
+    }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}
