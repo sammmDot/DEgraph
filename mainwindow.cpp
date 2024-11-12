@@ -5,6 +5,7 @@
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
+
     // Texto
     tituloG = new QLabel("DGraph", this);
     tituloG->setGeometry(700, 30, 250, 20);   // Posición (x, y) y tamaño ancho x alto
@@ -27,13 +28,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     tituloS->setGeometry(700, 280, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloS->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
-    tituloC = new QLabel("Eje z:", this);
+    tituloC = new QLabel("Eje z", this);
     tituloC->setGeometry(730, 405, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloC->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
-    // Intput ecuaciones
-    BarraE = new QLineEdit(this);             // Crea la barra de texto
-    BarraE->setGeometry(700, 100, 250, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    Autocompletar();
 
     // Intput minimo
     BarraMin = new QLineEdit(this);             // Crea la barra de texto
@@ -74,7 +73,33 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(BotonAlto, &QPushButton::clicked, this, &MainWindow::ReiniciarTodo);  // Conectar el clic del botón al slot ReiniciarTodo
 }
 
+
 // Valida y guarda la ecuacion
+void MainWindow::Autocompletar()
+{
+    //lista de comandos para las funciones matematicas de la bibloteca cmat
+    QStringList commands = {"sin", "cos", "tan", "asin", "acos", "atan", "atan2",
+                            "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
+                            "exp", "log", "log10", "log2", "pow", "sqrt", "cbrt",
+                            "ceil", "floor", "trunc", "round", "nearbyint", "remainder",
+                            "fmod", "fmax", "fmin", "fabs", "hypot", "frexp", "ldexp",
+                            "modf", "copysign"
+    };
+
+    // Crear el modelo para el autocompletar con la lista de comandos
+    model = new QStringListModel(commands, this);
+
+    // Configurar el completador
+    completar = new QCompleter(model, this);                         // Use una lista de comandos (commands) para autocompletar.
+    completar->setCaseSensitivity(Qt::CaseInsensitive);              // Ignore mayúsculas y minúsculas en las coincidencias.
+    completar->setCompletionMode(QCompleter::InlineCompletion);      // Sugiera palabras directamente en el campo de texto mientras el usuario escribe.
+
+    // Intput ecuaciones
+    BarraE = new QLineEdit(this);             // Crea la barra de texto
+    BarraE->setGeometry(700, 100, 250, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraE->setCompleter(completar);
+}
+
 void MainWindow::GuardaEcu(){
     QString Ecua = BarraE->text();
 
@@ -96,69 +121,63 @@ void MainWindow::GuardaEcu(){
     }
 }
 
+
 // Funciones para validar las variables del minimo y el maximo
 QString MainWindow::Confirmarm(){
     QString m = BarraMin->text();
 
-    // Controla el texto de m
-    QRegularExpression regex("^[0-9\\s\\-]+$");  // Esta expresión permite números y operadores
-    QRegularExpressionMatch match = regex.match(m);
+    bool conversionOk;
+    double minValue = m.toDouble(&conversionOk);  // Intenta convertir m a número
 
-    if (match.hasMatch()) {
-        // Si la ecuacion es valida
-        return m;  // Transfiere la variable
-    } else {
-        if (m== ""){
-            // Error por no ingresar nada
-            QMessageBox::warning(this, "Error", "No ingreso el minimo.");
-            return m;
-        }else{
-            // Error por no poner los signos correspondientes
-            QMessageBox::warning(this, "Error", "Hay un problema en el minimo. Por favor, usa solo números positivos o negativos.");
+    if (!conversionOk) {  // Si falla la conversión
+        if (m.isEmpty()) {
+            QMessageBox::warning(this, "Error", "No ingresó el mínimo.");
+        } else {
+            QMessageBox::warning(this, "Error", "El valor mínimo no es válido. Por favor, usa solo números.");
         }
+        return "";  // Retorna cadena vacía para indicar error
     }
+    return m;  // Devuelve el valor si es válido
 }
 
 QString MainWindow::ConfirmarM(){
     QString M = BarraMax->text();
 
-    // Controla el texto de M
-    QRegularExpression regex("^[0-9\\s\\-]+$");  // Esta expresión permite números y operadores
-    QRegularExpressionMatch match = regex.match(M);
+    bool conversionOk;
+    double maxValue = M.toDouble(&conversionOk);  // Intenta convertir M a número
 
-    if (match.hasMatch()) {
-        // Si la ecuacion es valida
-        return M;  // Transfiere la variable
-    } else {
-        if (M== ""){
-            // Error por no ingresar nada
-            QMessageBox::warning(this, "Error", "No ingreso el minimo.");
-            return M;
-        }else{
-            // Error por no poner los signos correspondientes
-            QMessageBox::warning(this, "Error", "Hay un problema en el minimo. Por favor, usa solo números positivos o negativos.");
+    if (!conversionOk) {  // Si falla la conversión
+        if (M.isEmpty()) {
+            QMessageBox::warning(this, "Error", "No ingresó el máximo.");
+        } else {
+            QMessageBox::warning(this, "Error", "El valor máximo no es válido. Por favor, usa solo números.");
+        }
+        return "";  // Retorna cadena vacía para indicar error
+    }
+    return M;  // Devuelve el valor si es válido
+}
+
+void MainWindow::GuardarMm(){
+    QString m = Confirmarm();
+    QString M = ConfirmarM();
+
+    if (m.isEmpty() || M.isEmpty()) {
+        return;  // Termina la función si hubo error previo en m o M
+    }
+    // Conversión segura, dado que m y M son válidos
+    bool conversionOk1, conversionOk2;
+    double minValue = m.toDouble(&conversionOk1);
+    double maxValue = M.toDouble(&conversionOk2);
+
+    if (conversionOk1 && conversionOk2) {
+        if (minValue < maxValue) {
+            Guardarm = m;   // Guardar mínimo
+            GuardarM = M;   // Guardar máximo
+        } else {
+            QMessageBox::warning(this, "Error", "El mínimo no puede ser mayor o igual que el máximo.");
         }
     }
 }
-
-// Funciones para guardar las variables del minimo y el maximo
-void MainWindow::GuardarMm(){                                                                    
-    QString m = Confirmarm();                                                                
-    QString M = ConfirmarM();           
-    if(m<M){
-        // m siempre tiene que ser menor que que M
-        Guardarm =m;   // Guardar la minimo en la variable de .h
-        GuardarM =M;  // Guardar la maximo en la variable de .h
-    }else{                                                                                 
-        if(M==""||m==""){
-            return;
-        }else{
-            // M es menor que m
-            QMessageBox::warning(this, "Error", "Hay un problema en el maximo y el minimo. Por favor,el minimo no puede ser mayor o igual que el maximo.");
-        }
-    }                                                                                       
-}
-
 
 // Validacion y guardado de la variable de la subdivision
 void MainWindow::GuardarSub(){
@@ -182,6 +201,7 @@ void MainWindow::GuardarSub(){
     }
 }
 
+
 // Funcion del boton check
 void MainWindow::Check(int state){
     if (state == Qt::Checked) {
@@ -191,24 +211,31 @@ void MainWindow::Check(int state){
     }
 }
 
+
+
 // Funcion SLOT boton ejecutar
 void MainWindow::Ejecutar() {
-    // Validar y guardar la ecuación ingresada
-    qDebug() << "Ejecutar() - Guardando ecuación...";
-    GuardaEcu();
+    try{
+            // Validar y guardar la ecuación ingresada
+            qDebug() << "Ejecutar() - Guardando ecuación...";
+            GuardaEcu();
 
-    // Validar y guardar la subdivisión
-    qDebug() << "Ejecutar() - Guardando subdivisión...";
-    GuardarSub();
+            // Validar y guardar el mínimo y el máximo
+            qDebug() << "Ejecutar() - Guardando mínimo y máximo...";
+            GuardarMm();
 
-    // Validar y guardar el mínimo y el máximo
-    qDebug() << "Ejecutar() - Validar y guardando mínimo y máximo...";
-    GuardarMm(m, M);
+            // Validar y guardar la subdivisión
+            qDebug() << "Ejecutar() - Guardando subdivisión...";
+            GuardarSub();
 
-    qDebug() << "Ejecutar() - Fin de la función Ejecutar";
+            qDebug() << "Ejecutar() - Fin de la función Ejecutar";
+        } catch (const std::exception &e) {
+            QMessageBox::critical(this, "Error crítico", QString("Ocurrió un error inesperado: %1").arg(e.what()));
+    }
 }
 
 
+// Funcion SLOT boton Detener
 void MainWindow::ReiniciarTodo() {
     // Restablecer las variables
     GuardarE.clear();
@@ -217,7 +244,10 @@ void MainWindow::ReiniciarTodo() {
     GuardarM.clear();
 }
 
+
+
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
