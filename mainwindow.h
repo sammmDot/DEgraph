@@ -8,6 +8,11 @@
 #include <QPushButton>  // Incluye los botones
 #include <QString>      // Incluye una libreria de string
 #include <QCheckBox>    // Incluye botones con check
+#include <QCompleter>   // Incluye un listado para autocompletar
+#include <QStringList>          // Crea una lista de un conjunto de palabras
+#include <QRegularExpression>   // Verifica el formato de entradas de usuario, extraer información de texto o validar datos.
+#include <QVBoxLayout>          // Pone los widget en una fila para abajo.
+#include <QStringListModel>    
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,10 +32,11 @@ public:
     QString ConfirmarM();                   // Valida el maximo
     void GuardarMm();                       // Guardar el maximo y el minimo
     void GuardarSub();                      // Valida y guardan las subdivisiones
+    void Autocompletar();            // Inicialisa el autocompletado
 
 private slots:
     void Ejecutar();                        // Slot para ejecutar toda las funciones
-    void ReiniciarTodo();
+    void ReiniciarTodo();                  // Slot para reiniciar variables
     void Check(int state);                 // Slot para manejar cambios de estado de la caja
 
 private:
@@ -42,6 +48,8 @@ private:
     QLabel *tituloE;               // Titulo de la ecuacion
     QLineEdit *BarraE;             // Barra de texto para ingresar la ecuación
     QString GuardarE;              // Variable para almacenar la ecuación
+    QStringListModel *model;       // Agrega una lista
+    QCompleter *completar;         // Completa las funciones matematicas
 
     //Relacionado con los ingreso del minimo
     QLabel *tituloMin;               // Titulo del minimo
