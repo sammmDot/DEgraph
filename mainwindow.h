@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMainWindow>
+#include <QWidget>
 #include <QLabel>       // Incluye texto no editable por el usuario
 #include <QLineEdit>    // Incluye barras de textos
 #include <QPushButton>  // Incluye los botones
@@ -12,7 +13,9 @@
 #include <QStringList>          // Crea una lista de un conjunto de palabras
 #include <QRegularExpression>   // Verifica el formato de entradas de usuario, extraer información de texto o validar datos.
 #include <QVBoxLayout>          // Pone los widget en una fila para abajo.
-#include <QStringListModel>    
+#include <QStringListModel>
+#include <QListWidget>
+#include <QCloseEvent>  // Para manejar el evento de cierre
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,8 +28,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    //ventana principal
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
     void GuardaEcu();                       // Valida y guardan las ecuación
     QString Confirmarm();                   // Valida el minimo
     QString ConfirmarM();                   // Valida el maximo
@@ -38,11 +43,10 @@ private slots:
     void Ejecutar();                        // Slot para ejecutar toda las funciones
     void ReiniciarTodo();                  // Slot para reiniciar variables
     void Check(int state);                 // Slot para manejar cambios de estado de la caja
+    void Glosario();                  // Slot para crear una ventana nueva
 
 private:
     Ui::MainWindow *ui;
-    // Extras
-    QLabel *tituloG;               // Titulo
 
     // Relacionado con ingreso de ecuacion
     QLabel *tituloE;               // Titulo de la ecuacion
@@ -73,5 +77,46 @@ private:
     // Botones para finalizar
     QPushButton *BotonEj;          // Botón para ejecutar
     QPushButton *BotonAlto;        // Botón reiniciar
+
+    // Boton de glosario
+    QPushButton *BotonGlo;          // Boton para abrir un nueva ventana
 };
+
+class SecondWindow : public QWidget {
+    Q_OBJECT
+public:
+    explicit SecondWindow(QWidget *parent = nullptr);
+    ~SecondWindow();
+private:
+    QLabel *titulo;                 //texto de la ventana
+    QLabel *Glo;                    //texto de la ventana
+    QVBoxLayout *G;
+    QListWidget *listG;             // Lista de funciones
+};
+
 #endif // MAINWINDOW_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
