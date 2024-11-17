@@ -1,17 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QVBoxLayout>
+#include <QMap>
 #include <QMessageBox>          // Aparece otra ventan con un mensaje
 #include <QRegularExpression>   // Verifica el formato de entradas de usuario, extraer información de texto o validar datos
+
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
 
     // Texto
-    tituloG = new QLabel("DeGraph", this);
-    tituloG->setGeometry(700, 30, 250, 20);   // Posición (x, y) y tamaño ancho x alto
-    tituloG->setStyleSheet("font-size: 18px; font-weight: bold; color: #333;");  // Caracteristicas generales
-    tituloG->setAlignment(Qt::AlignCenter);   // Centtra el texto
-
     tituloE = new QLabel("Ingrese la ecuacion:", this);
     tituloE->setGeometry(700, 80, 200, 20); // Posición (x, y) y tamaño ancho x alto
     tituloE->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
@@ -29,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     tituloS->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloC = new QLabel("Eje z", this);
-    tituloC->setGeometry(730, 405, 250, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloC->setGeometry(740, 405, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloC->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     // Funcion para barra de ecuaciones
@@ -68,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     // Boton check
     BotonC = new QCheckBox(this);
-    BotonC->setGeometry(700, 400, 200, 30); // Posición y tamaño de check
+    BotonC->setGeometry(720, 400, 200, 30); // Posición y tamaño de check
     connect(BotonC, &QCheckBox::stateChanged, this, &MainWindow::Check);  //conecta el boton con una condicion
 
     // Boton ejecutar
@@ -78,7 +76,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                            "QPushButton:hover {""background-color: #8aeb81;""}"
                            "QPushButton:pressed {""background-color: #8aeb81;""}"
                            );
-    BotonEj->setGeometry(700, 500, 120, 30);  // Ubicacion
+    BotonEj->setGeometry(700, 500, 100, 50);  // Ubicacion
+    connect(BotonEj, &QPushButton::clicked, this, &MainWindow::Ejecutar);  // Conectar el clic del botón al slot Ejecutar
 
     // Boton detener
     BotonAlto = new QPushButton("Detener", this);
@@ -87,10 +86,30 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                              "QPushButton:hover {""background-color: #ed8c9f;""}"
                              "QPushButton:pressed {""background-color: #ed8c9f;""}"
                             );
-    BotonAlto->setGeometry(850, 500, 120, 30);  // Ubicacion
+    BotonAlto->setGeometry(850, 500, 100, 50);  // Ubicacion
 
-    connect(BotonEj, &QPushButton::clicked, this, &MainWindow::Ejecutar);  // Conectar el clic del botón al slot Ejecutar
     connect(BotonAlto, &QPushButton::clicked, this, &MainWindow::ReiniciarTodo);  // Conectar el clic del botón al slot ReiniciarTodo
+
+    // Boton glosario
+    BotonGlo = new QPushButton(this);
+        // Caracteristicas del boton
+    BotonGlo->setStyleSheet("QPushButton {"
+                            "border-radius: 10px; "
+                            "icon-size: 50px 50px;"                     // Tamaño del ícono
+                            "background-color: #dcfaf0;"                 // Color de fondo
+                            "qproperty-icon: url(:/botones/boton.png);" // Imagen normal
+                            "}"
+                            "QPushButton:hover {"
+                            "background-color: #c3f4e3;"                // Color de fondo
+                            "qproperty-icon: url(:/botones/boton_pres.png);"  // Imagen en hover
+                            "}"
+                            "QPushButton:pressed {"
+                            "background-color: #c3f4e3;"                      // Color de fondo
+                            "qproperty-icon: url(:/botones/boton_pres.png);"  // Imagen en hover
+                            "}"
+                            );
+    BotonGlo->setGeometry(870, 385, 60, 60);  // Ubicacion
+    connect(BotonGlo, &QPushButton::clicked, this, &MainWindow::Glosario);   // Conectar el clic del botón al slot Glosario, abiendo otra vetana
 }
 
 
@@ -98,12 +117,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 void MainWindow::Autocompletar()
 {
     //lista de comandos para las funciones matematicas de la bibloteca cmat
-    QStringList commands = {"sin", "cos", "tan", "asin", "acos", "atan", "atan2",
-                            "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
-                            "exp", "log", "log10", "log2", "pow", "sqrt", "cbrt",
+    QStringList commands = {"sin()", "cos()", "tan()", "asin()", "acos()", "atan()", "atan2()",
+                            "sinh()", "cosh()", "tanh()", "asinh()", "acosh()", "atanh()",
+                            "exp()", "log()", "log10()", "log2()", "pow()", "sqrt()", "cbrt()",
                             "ceil", "floor", "trunc", "round", "nearbyint", "remainder",
-                            "fmod", "fmax", "fmin", "fabs", "hypot", "frexp", "ldexp",
-                            "modf", "copysign"
+                            "fmod()", "fmax()", "fmin()", "fabs()", "hypot()", "frexp()", "ldexp()",
+                            "modf()", "copysign()"
     };
 
     // Crear el modelo para el autocompletar con la lista de comandos
@@ -132,8 +151,8 @@ void MainWindow::GuardaEcu() {
     QRegularExpression regex("^\\s*([\\dx+yz\\-*/^()\\s]+|(\\b(?:sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|log|log10|log2|pow|sqrt|cbrt|ceil|floor|trunc|round|nearbyint|remainder|fmod|fmax|fmin|fabs|hypot|frexp|ldexp|modf|copysign)\\b\\s*\\(\\s*[\\dx+yz\\-*/^()\\s]+\\)))+$"); // Incluye x, y, z y al menos un número
     QRegularExpressionMatch match = regex.match(Ecua);
 
-    // Verificar que contenga al menos un número o variable
-    bool contieneNumero = Ecua.contains(QRegularExpression("\\d"));
+    // Verificar que contenga al menos un número o variable (x, y, z)
+    bool contieneNumero = Ecua.contains(QRegularExpression("[\\dxyz]"));
 
     if (match.hasMatch() && contieneNumero) { // Verifica que contenga solo caracteres válidos y al menos un número
         // Si la ecuación es válida
@@ -301,6 +320,7 @@ void MainWindow::Check(int state){
 }
 
 
+
 // Funcion SLOT boton ejecutar
 void MainWindow::Ejecutar() {
     try{
@@ -351,6 +371,95 @@ void MainWindow::ReiniciarTodo() {
                           "background-color: #dcfaf0;"
                           "}");
 }
+
+MainWindow::~MainWindow() {}
+
+
+
+// Datos del glosario (nombre de la función y descripción)
+QMap<QString, QString> crearGlosario() {
+    QMap<QString, QString> glossary;
+    glossary["abs"] = "Devuelve el valor absoluto de un número.";
+    glossary["acos"] = "Devuelve el arco coseno de un valor en radianes.";
+    glossary["asin"] = "Devuelve el arco seno de un valor en radianes.";
+    glossary["atan"] = "Devuelve el arco tangente de un valor en radianes.";
+    glossary["cos"] = "Devuelve el coseno de un ángulo (en radianes).";
+    glossary["sin"] = "Devuelve el seno de un ángulo (en radianes).";
+    glossary["tan"] = "Devuelve la tangente de un ángulo (en radianes).";
+    glossary["sqrt"] = "Devuelve la raíz cuadrada de un número.";
+    glossary["log"] = "Devuelve el logaritmo natural (base e) de un número.";
+    glossary["pow"] = "Eleva un número base a una potencia específica.";
+    return glossary;
+}
+
+// Función para abrir la segunda ventana
+void MainWindow::Glosario() {
+    SecondWindow *newWindow = new SecondWindow();
+    newWindow->show();
+}
+
+// Implementación de SecondWindow
+SecondWindow::SecondWindow(QWidget *parent) : QWidget(parent) {
+    this->setWindowTitle("Glosario de funciones");
+    this->resize(300, 200);
+
+    Glo = new QLabel("Selecciona una función para ver la descripción:", this);
+    Glo->setAlignment(Qt::AlignCenter);
+
+    G = new QVBoxLayout();
+    G->addWidget(Glo);
+    this->setLayout(G);
+
+    // Crear lista de funciones con sus descripciones
+    listG = new QListWidget(this);
+    QMap<QString, QString> glossary = crearGlosario();
+
+    // Verifica si el glosario se está creando correctamente
+    qDebug() << "Glosario creado con " << glossary.size() << " elementos.";
+
+    for (const QString &functionName : glossary.keys()) {
+        QListWidgetItem *item = new QListWidgetItem(functionName, listG);
+        QString tooltipText = glossary.value(functionName);
+
+        // Debugging: verifica que los tooltips estén configurados correctamente
+        qDebug() << "Asignando tooltip: " << tooltipText;
+
+        item->setToolTip(tooltipText); // Mostrar la descripción al pasar el ratón
+    }
+
+    // Añadir la lista al layout
+    G->addWidget(listG);
+    listG->setFocus();
+
+    // Estilo de los tooltips (en caso de que no se muestren con el estilo por defecto)
+    qApp->setStyleSheet("QToolTip { "
+                        "color: #ffffff; "
+                        "background-color: #2a82da; "
+                        "border: 1px solid #000000; "
+                        "padding: 5px; "
+                        "border-radius: 3px; }");
+
+    this->setLayout(G);
+}
+
+SecondWindow::~SecondWindow() {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
