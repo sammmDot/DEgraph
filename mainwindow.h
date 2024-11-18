@@ -16,6 +16,7 @@
 #include <QStringListModel>
 #include <QListWidget>
 #include <QCloseEvent>  // Para manejar el evento de cierre
+#include <QPixmap>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -43,11 +44,12 @@ private slots:
     void Ejecutar();                        // Slot para ejecutar toda las funciones
     void ReiniciarTodo();                  // Slot para reiniciar variables
     void Check(int state);                 // Slot para manejar cambios de estado de la caja
-    void Glosario();                  // Slot para crear una ventana nueva
+    void Glosario();        // Slot para crear una ventana nueva
 
 private:
     Ui::MainWindow *ui;
 
+    QLabel *Titulo;
     // Relacionado con ingreso de ecuacion
     QLabel *tituloE;               // Titulo de la ecuacion
     QLineEdit *BarraE;             // Barra de texto para ingresar la ecuación
@@ -82,26 +84,27 @@ private:
     QPushButton *BotonGlo;          // Boton para abrir un nueva ventana
 };
 
+
+
 class SecondWindow : public QWidget {
     Q_OBJECT
+
 public:
     explicit SecondWindow(QWidget *parent = nullptr);
     ~SecondWindow();
+
+private slots:
+    void mostrarDescripcion(QListWidgetItem *item);
+
 private:
     QLabel *titulo;                 //texto de la ventana
     QLabel *Glo;                    //texto de la ventana
+    QLabel *descriptionLabel;                    //texto de la ventana
     QVBoxLayout *G;
     QListWidget *listG;             // Lista de funciones
 };
 
 #endif // MAINWINDOW_H
-
-
-
-
-
-
-
 
 
 
