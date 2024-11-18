@@ -10,24 +10,30 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->setupUi(this);
 
     // Texto
+    Titulo = new QLabel(this);
+    QPixmap pixmap(":/logo/Logo.png");// Cargar la imagen desde un archivo
+    Titulo->setPixmap(pixmap);
+    Titulo->setPixmap(pixmap.scaled(300, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation));  // Ajustar imagen al QLabel
+    Titulo->setGeometry(675, 40, 500, 150); // Usar geometría para establecer posición y tamaño
+
     tituloE = new QLabel("Ingrese la ecuacion:", this);
-    tituloE->setGeometry(700, 80, 200, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloE->setGeometry(700, 180, 200, 20); // Posición (x, y) y tamaño ancho x alto
     tituloE->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloMin = new QLabel("Minimo:", this);
-    tituloMin->setGeometry(700, 180, 100, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloMin->setGeometry(700, 280, 100, 20); // Posición (x, y) y tamaño ancho x alto
     tituloMin->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;");
 
     tituloMax = new QLabel("Maximo:", this);
-    tituloMax->setGeometry(850, 180, 100, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloMax->setGeometry(850, 280, 100, 20); // Posición (x, y) y tamaño ancho x alto
     tituloMax->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloS = new QLabel("Subdivision:", this);
-    tituloS->setGeometry(700, 280, 250, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloS->setGeometry(700, 380, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloS->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloC = new QLabel("Eje z", this);
-    tituloC->setGeometry(740, 405, 250, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloC->setGeometry(700, 505, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloC->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     // Funcion para barra de ecuaciones
@@ -39,9 +45,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BarraMin->setStyleSheet("QLineEdit {"
                             "border-radius: 10px;"
                             "padding: 5px;"
-                            "background-color: #dcfaf0;"
+                            "background-color: #b4ddd8;"
                             "}");
-    BarraMin->setGeometry(700, 200, 100, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraMin->setGeometry(700, 300, 100, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
 
 
     // Imput maximo
@@ -50,23 +56,23 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BarraMax->setStyleSheet("QLineEdit {"
                             "border-radius: 10px;"
                             "padding: 5px;"
-                            "background-color: #dcfaf0;"
+                            "background-color: #b4ddd8;"
                             "}");
-    BarraMax->setGeometry(850, 200, 100, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
-
+    BarraMax->setGeometry(850, 300, 100, 30);   a8dbd4 // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+a8dbd4
     // Imput subdivision
     BarraS = new QLineEdit(this);              // Crea la barra de texto
     //Caracterristicas de la barra
     BarraS->setStyleSheet("QLineEdit {"
                             "border-radius: 10px;"
                             "padding: 5px;"
-                            "background-color: #dcfaf0;"
+                            "background-color: #b4ddd8;"
                             "}");
-    BarraS->setGeometry(700, 300, 250, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraS->setGeometry(700, 400, 250, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
 
     // Boton check
     BotonC = new QCheckBox(this);
-    BotonC->setGeometry(720, 400, 200, 30); // Posición y tamaño de check
+    BotonC->setGeometry(720, 500, 30, 30); // Posición y tamaño de check
     connect(BotonC, &QCheckBox::stateChanged, this, &MainWindow::Check);  //conecta el boton con una condicion
 
     // Boton ejecutar
@@ -76,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                            "QPushButton:hover {""background-color: #8aeb81;""}"
                            "QPushButton:pressed {""background-color: #8aeb81;""}"
                            );
-    BotonEj->setGeometry(700, 500, 100, 50);  // Ubicacion
+    BotonEj->setGeometry(700, 600, 100, 50);  // Ubicacion
     connect(BotonEj, &QPushButton::clicked, this, &MainWindow::Ejecutar);  // Conectar el clic del botón al slot Ejecutar
 
     // Boton detener
@@ -86,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                              "QPushButton:hover {""background-color: #ed8c9f;""}"
                              "QPushButton:pressed {""background-color: #ed8c9f;""}"
                             );
-    BotonAlto->setGeometry(850, 500, 100, 50);  // Ubicacion
+    BotonAlto->setGeometry(850, 600, 100, 50);  // Ubicacion
 
     connect(BotonAlto, &QPushButton::clicked, this, &MainWindow::ReiniciarTodo);  // Conectar el clic del botón al slot ReiniciarTodo
 
@@ -96,19 +102,19 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonGlo->setStyleSheet("QPushButton {"
                             "border-radius: 10px; "
                             "icon-size: 50px 50px;"                     // Tamaño del ícono
-                            "background-color: #dcfaf0;"                 // Color de fondo
+                            "background-color: #b4ddd8;"                 // Color de fondo
                             "qproperty-icon: url(:/botones/boton.png);" // Imagen normal
                             "}"
                             "QPushButton:hover {"
-                            "background-color: #c3f4e3;"                // Color de fondo
+                            "background-color: #a8dbd4;"                // Color de fondo
                             "qproperty-icon: url(:/botones/boton_pres.png);"  // Imagen en hover
                             "}"
                             "QPushButton:pressed {"
-                            "background-color: #c3f4e3;"                      // Color de fondo
+                            "background-color: #a8dbd4;"                      // Color de fondo
                             "qproperty-icon: url(:/botones/boton_pres.png);"  // Imagen en hover
                             "}"
                             );
-    BotonGlo->setGeometry(870, 385, 60, 60);  // Ubicacion
+    BotonGlo->setGeometry(870, 485, 60, 60);  // Ubicacion
     connect(BotonGlo, &QPushButton::clicked, this, &MainWindow::Glosario);   // Conectar el clic del botón al slot Glosario, abiendo otra vetana
 }
 
@@ -139,9 +145,9 @@ void MainWindow::Autocompletar()
     BarraE->setStyleSheet("QLineEdit {"
                             "border-radius: 10px;"
                             "padding: 5px;"
-                            "background-color: #dcfaf0;"
+                            "background-color: #b4ddd8;"
                             "}");
-    BarraE->setGeometry(700, 100, 250, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraE->setGeometry(700, 200, 250, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
     BarraE->setCompleter(completar);
 }
 
@@ -159,7 +165,7 @@ void MainWindow::GuardaEcu() {
         BarraE->setStyleSheet("QLineEdit {"
                               "border-radius: 10px;"
                               "padding: 5px;"
-                              "background-color: #dcfaf0;"
+                              "background-color: #93d4cc;"
                               "}");
         GuardarE = Ecua;  // Guardar la ecuación en la variable creada en .h
     } else {
@@ -172,7 +178,7 @@ void MainWindow::GuardaEcu() {
         BarraE->setStyleSheet("QLineEdit {"
                               "border-radius: 10px;"
                               "padding: 5px;"
-                              "background-color: #f5c2bd;"
+                              "background-color: #b4ddd8;"
                               "}");
     }
 }
@@ -201,7 +207,7 @@ QString MainWindow::Confirmarm(){
     BarraMin->setStyleSheet("QLineEdit {"
                             "border-radius: 10px;"
                             "padding: 5px;"
-                            "background-color: #dcfaf0;"
+                            "background-color: #b4ddd8;"
                             "}");
     return m;  // Devuelve el valor si es válido
 }
@@ -228,7 +234,7 @@ QString MainWindow::ConfirmarM(){
     BarraMax->setStyleSheet("QLineEdit {"
                             "border-radius: 10px;"
                             "padding: 5px;"
-                            "background-color: #dcfaf0;"
+                            "background-color: #b4ddd8;"
                             "}");
     return M;  // Devuelve el valor si es válido
 }
@@ -253,12 +259,12 @@ void MainWindow::GuardarMm(){
             BarraMin->setStyleSheet("QLineEdit {"
                                     "border-radius: 10px;"
                                     "padding: 5px;"
-                                    "background-color: #dcfaf0;"
+                                    "background-color: #b4ddd8;"
                                     "}");
             BarraMax->setStyleSheet("QLineEdit {"
                                     "border-radius: 10px;"
                                     "padding: 5px;"
-                                    "background-color: #dcfaf0;"
+                                    "background-color: #b4ddd8;"
                                     "}");
         } else {
             QMessageBox::warning(this, "Error", "El mínimo no puede ser mayor o igual que el máximo.");
@@ -290,7 +296,7 @@ void MainWindow::GuardarSub(){
         BarraS->setStyleSheet("QLineEdit {"
                                 "border-radius: 10px;"
                                 "padding: 5px;"
-                                "background-color: #dcfaf0;"
+                                "background-color: #b4ddd8;"
                                 "}");
     } else {
         // Si el valor no es válido
@@ -350,25 +356,25 @@ void MainWindow::ReiniciarTodo() {
     BarraE->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
-                          "background-color: #dcfaf0;"
+                          "background-color: #b4ddd8;"
                           "}");
     GuardarS.clear();
     BarraS->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
-                          "background-color: #dcfaf0;"
+                          "background-color: #b4ddd8;"
                           "}");
     Guardarm.clear();
     BarraMin->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
-                          "background-color: #dcfaf0;"
+                          "background-color: #b4ddd8;"
                           "}");
     GuardarM.clear();
     BarraMax->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
-                          "background-color: #dcfaf0;"
+                          "background-color: #b4ddd8;"
                           "}");
 }
 
@@ -401,70 +407,46 @@ void MainWindow::Glosario() {
 // Implementación de SecondWindow
 SecondWindow::SecondWindow(QWidget *parent) : QWidget(parent) {
     this->setWindowTitle("Glosario de funciones");
-    this->resize(300, 200);
+    this->resize(300, 300);
 
+    // Etiqueta para título
     Glo = new QLabel("Selecciona una función para ver la descripción:", this);
     Glo->setAlignment(Qt::AlignCenter);
 
+    // Layout principal
     G = new QVBoxLayout();
     G->addWidget(Glo);
-    this->setLayout(G);
 
-    // Crear lista de funciones con sus descripciones
+    // Lista de funciones
     listG = new QListWidget(this);
     QMap<QString, QString> glossary = crearGlosario();
 
-    // Verifica si el glosario se está creando correctamente
-    qDebug() << "Glosario creado con " << glossary.size() << " elementos.";
-
     for (const QString &functionName : glossary.keys()) {
         QListWidgetItem *item = new QListWidgetItem(functionName, listG);
-        QString tooltipText = glossary.value(functionName);
-
-        // Debugging: verifica que los tooltips estén configurados correctamente
-        qDebug() << "Asignando tooltip: " << tooltipText;
-
-        item->setToolTip(tooltipText); // Mostrar la descripción al pasar el ratón
+        item->setData(Qt::UserRole, glossary.value(functionName)); // Guardar descripción en el item
     }
 
     // Añadir la lista al layout
     G->addWidget(listG);
-    listG->setFocus();
 
-    // Estilo de los tooltips (en caso de que no se muestren con el estilo por defecto)
-    qApp->setStyleSheet("QToolTip { "
-                        "color: #ffffff; "
-                        "background-color: #2a82da; "
-                        "border: 1px solid #000000; "
-                        "padding: 5px; "
-                        "border-radius: 3px; }");
+    // Etiqueta para mostrar la descripción
+    descriptionLabel = new QLabel("Descripción: ", this);
+    descriptionLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    descriptionLabel->setWordWrap(true); // Permitir que el texto se ajuste al ancho del widget
+    G->addWidget(descriptionLabel);
 
+    // Conectar la selección de la lista al cambio de texto en la etiqueta
+    connect(listG, &QListWidget::itemClicked, this, &SecondWindow::mostrarDescripcion);
+
+    // Aplicar el layout principal
     this->setLayout(G);
 }
 
-SecondWindow::~SecondWindow() {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-MainWindow::~MainWindow()
-{
-    delete ui;
+// Método para mostrar la descripción en el QLabel
+void SecondWindow::mostrarDescripcion(QListWidgetItem *item) {
+    QString description = item->data(Qt::UserRole).toString();
+    descriptionLabel->setText("Descripción: " + description);
 }
+
+SecondWindow::~SecondWindow() {}
 
