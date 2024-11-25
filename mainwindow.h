@@ -38,41 +38,56 @@ public:
     QString ConfirmarM();                   // Valida el maximo
     void GuardarMm();                       // Guardar el maximo y el minimo
     void GuardarSub();                      // Valida y guardan las subdivisiones
-    void Autocompletar();            // Inicialisa el autocompletado
+    void Autocompletar();                   // Inicialisa el autocompletado
 
 private slots:
+    // Slots para botones de ayuda al usuario
+    void BAE();
+    void BAMm();
+    void BAS();
+    void BAZ();
+
+    //Funciones
     void Ejecutar();                        // Slot para ejecutar toda las funciones
     void ReiniciarTodo();                  // Slot para reiniciar variables
     void Check(int state);                 // Slot para manejar cambios de estado de la caja
-    void Glosario();        // Slot para crear una ventana nueva
+
+    void Glosario();                       // Slot para crear una ventana nueva
 
 private:
     Ui::MainWindow *ui;
 
     QLabel *Titulo;
+
+    // Botones de ayuda
+    QPushButton *BotonAE;        // Boton ayuda ecuacion
+    QPushButton *BotonAMm;       // Boton ayuda minimo y maximo
+    QPushButton *BotonAS;        // Boton ayuda Subdivicion
+    QPushButton *BotonAZ;        // Boton ayuda eje z
+
     // Relacionado con ingreso de ecuacion
     QLabel *tituloE;               // Titulo de la ecuacion
     QLineEdit *BarraE;             // Barra de texto para ingresar la ecuación
-    QString GuardarE;              // Variable para almacenar la ecuación
+    float GuardarE;              // Variable para almacenar la ecuación
     QStringListModel *model;       // Agrega una lista
     QCompleter *completar;         // Completa las funciones matematicas
 
-    //Relacionado con los ingreso del minimo
+    // Relacionado con los ingreso del minimo
     QLabel *tituloMin;               // Titulo del minimo
     QLineEdit *BarraMin;             // Barra de texto para minimo
-    QString Guardarm;               // Variable para almacenar el minimo
+    float Guardarm;               // Variable para almacenar el minimo
 
-    //Relacionado con los ingreso del maximo
+    // Relacionado con los ingreso del maximo
     QLabel *tituloMax;               // Titulo del maximo
     QLineEdit *BarraMax;             // Barra de texto para maximo
-    QString GuardarM;               // Variable para almacenar el maximo
+    float GuardarM;               // Variable para almacenar el maximo
 
-    //Relacionado con los ingreso de subdivisiones
+    // Relacionado con los ingreso de subdivisiones
     QLabel *tituloS;                 // Titulo del maximo
     QLineEdit *BarraS;              // Barra de texto para ingreso de subdivisiones
-    QString GuardarS;               // Variable para almacenar cuanto se va a dividr el eje
+    float GuardarS;               // Variable para almacenar cuanto se va a dividr el eje
 
-    //Relacionado con el boton de check
+    // Relacionado con el boton de check
     QLabel *tituloC;                 // Subtitulo del boton
     QCheckBox *BotonC;               // Boton check
 
@@ -99,27 +114,9 @@ private slots:
 private:
     QLabel *titulo;                 //texto de la ventana
     QLabel *Glo;                    //texto de la ventana
-    QLabel *descriptionLabel;                    //texto de la ventana
+    QLabel *descriptionLabel;       //texto de la ventana
     QVBoxLayout *G;
     QListWidget *listG;             // Lista de funciones
 };
 
 #endif // MAINWINDOW_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
