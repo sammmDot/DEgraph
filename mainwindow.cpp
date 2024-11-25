@@ -33,8 +33,47 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     tituloS->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloC = new QLabel("Eje z", this);
-    tituloC->setGeometry(700, 505, 250, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloC->setGeometry(734, 505, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloC->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
+
+    // Botones ayuda
+    BotonAE = new QPushButton("i", this);
+    // Caracteristicas del boton
+    BotonAE->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
+                           "QPushButton:hover {""background-color: #c0c0c0;""}"
+                           "QPushButton:pressed {""background-color: #c0c0c0;""}");
+    BotonAE->setGeometry(910, 205, 18, 18);  // Ubicacion
+    // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
+    connect(BotonAE, &QPushButton::clicked, this, &MainWindow::BAE);
+
+    BotonAMm = new QPushButton("i", this);
+    // Caracteristicas del boton
+    BotonAMm->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
+                           "QPushButton:hover {""background-color: #c0c0c0;""}"
+                           "QPushButton:pressed {""background-color: #c0c0c0;""}");
+    BotonAMm->setGeometry(815, 305, 18, 18);  // Ubicacion
+    // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
+    connect(BotonAMm, &QPushButton::clicked, this, &MainWindow::BAMm);
+
+    BotonAS = new QPushButton("i", this);
+    // Caracteristicas del boton
+    BotonAS->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
+                           "QPushButton:hover {""background-color: #c0c0c0;""}"
+                           "QPushButton:pressed {""background-color: #c0c0c0;""}");
+    BotonAS->setGeometry(910, 405, 18, 18);  // Ubicacion
+    // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
+    connect(BotonAS, &QPushButton::clicked, this, &MainWindow::BAS);
+
+    BotonAZ = new QPushButton("i", this);
+    // Caracteristicas del boton
+    BotonAZ->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
+                            "QPushButton:hover {""background-color: #c0c0c0;""}"
+                            "QPushButton:pressed {""background-color: #c0c0c0;""}");
+    BotonAZ->setGeometry(770, 505, 18, 18);  // Ubicacion
+    // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
+    connect(BotonAZ, &QPushButton::clicked, this, &MainWindow::BAZ);
+
+
 
     // Funcion para barra de ecuaciones
     Autocompletar();
@@ -58,8 +97,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                             "padding: 5px;"
                             "background-color: #b4ddd8;"
                             "}");
-    BarraMax->setGeometry(850, 300, 100, 30);   a8dbd4 // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
-a8dbd4
+    BarraMax->setGeometry(850, 300, 100, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+
     // Imput subdivision
     BarraS = new QLineEdit(this);              // Crea la barra de texto
     //Caracterristicas de la barra
@@ -68,11 +107,11 @@ a8dbd4
                             "padding: 5px;"
                             "background-color: #b4ddd8;"
                             "}");
-    BarraS->setGeometry(700, 400, 250, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraS->setGeometry(700, 400, 200, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
 
     // Boton check
     BotonC = new QCheckBox(this);
-    BotonC->setGeometry(720, 500, 30, 30); // Posición y tamaño de check
+    BotonC->setGeometry(710, 500, 15, 30); // Posición y tamaño de check
     connect(BotonC, &QCheckBox::stateChanged, this, &MainWindow::Check);  //conecta el boton con una condicion
 
     // Boton ejecutar
@@ -106,7 +145,7 @@ a8dbd4
                             "qproperty-icon: url(:/botones/boton.png);" // Imagen normal
                             "}"
                             "QPushButton:hover {"
-                            "background-color: #a8dbd4;"                // Color de fondo
+                            "background-color: #a8dbd4;"                       // Color de fondo
                             "qproperty-icon: url(:/botones/boton_pres.png);"  // Imagen en hover
                             "}"
                             "QPushButton:pressed {"
@@ -118,17 +157,28 @@ a8dbd4
     connect(BotonGlo, &QPushButton::clicked, this, &MainWindow::Glosario);   // Conectar el clic del botón al slot Glosario, abiendo otra vetana
 }
 
+// Botones de ayuda
+void MainWindow::BAE(){
+    QMessageBox::information(this, " ", "La ecuacion debe tene almenos un numero o varable(x ,y o z). Ademas se pueden agregar funciones, las cuales estan disponibles en el boton con un libro, indicandole que hace cada una.");
+}
+void MainWindow::BAMm(){
+    QMessageBox::information(this, " ", "Esto indica elrango donde se mvera la funcion en el eje y.");//no estoy segura de esto
+}
+void MainWindow::BAS(){
+    QMessageBox::information(this, " ", "Divide las lineas????");
+}
+void MainWindow::BAZ(){
+    QMessageBox::information(this, " ", "Si el check esta activado, este mostrara un grafico con trs ejes, ose que sera de tres dimenciones. En cambio, si esta desactivado, el grafico solo mostrara dos eje, siendo asi de dos dimensiones");
+}
+
 
 // Valida y guarda la ecuacion
 void MainWindow::Autocompletar()
 {
     //lista de comandos para las funciones matematicas de la bibloteca cmat
     QStringList commands = {"sin()", "cos()", "tan()", "asin()", "acos()", "atan()", "atan2()",
-                            "sinh()", "cosh()", "tanh()", "asinh()", "acosh()", "atanh()",
-                            "exp()", "log()", "log10()", "log2()", "pow()", "sqrt()", "cbrt()",
-                            "ceil", "floor", "trunc", "round", "nearbyint", "remainder",
-                            "fmod()", "fmax()", "fmin()", "fabs()", "hypot()", "frexp()", "ldexp()",
-                            "modf()", "copysign()"
+                            "sinh()", "cosh()", "tanh()", "asinh()", "acosh()", "atanh()", "exp()",
+                            "log()", "log10()", "log2()", "pow()", "sqrt()", "floor()", "round()"
     };
 
     // Crear el modelo para el autocompletar con la lista de comandos
@@ -147,14 +197,14 @@ void MainWindow::Autocompletar()
                             "padding: 5px;"
                             "background-color: #b4ddd8;"
                             "}");
-    BarraE->setGeometry(700, 200, 250, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraE->setGeometry(700, 200, 200, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
     BarraE->setCompleter(completar);
 }
 
 void MainWindow::GuardaEcu() {
     QString Ecua = BarraE->text();
 
-    QRegularExpression regex("^\\s*([\\dx+yz\\-*/^()\\s]+|(\\b(?:sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|log|log10|log2|pow|sqrt|cbrt|ceil|floor|trunc|round|nearbyint|remainder|fmod|fmax|fmin|fabs|hypot|frexp|ldexp|modf|copysign)\\b\\s*\\(\\s*[\\dx+yz\\-*/^()\\s]+\\)))+$"); // Incluye x, y, z y al menos un número
+    QRegularExpression regex("^\\s*([\\dx+yz\\-*/^()\\s]+|(\\b(?:sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|log|log10|log2|pow|sqrt|floor|round|copysign)\\b\\s*\\(\\s*[\\dx+yz\\-*/^()\\s]+\\)))+$"); // Incluye x, y, z y al menos un número
     QRegularExpressionMatch match = regex.match(Ecua);
 
     // Verificar que contenga al menos un número o variable (x, y, z)
@@ -165,9 +215,10 @@ void MainWindow::GuardaEcu() {
         BarraE->setStyleSheet("QLineEdit {"
                               "border-radius: 10px;"
                               "padding: 5px;"
-                              "background-color: #93d4cc;"
+                              "background-color: #b4ddd8;"
                               "}");
-        GuardarE = Ecua;  // Guardar la ecuación en la variable creada en .h
+        bool conversionOk;
+        GuardarE = Ecua.toFloat(&conversionOk);  // Guardar la ecuación en la variable creada en .h
     } else {
         // La ecuación no es válida
         if (Ecua.isEmpty()) {
@@ -178,7 +229,7 @@ void MainWindow::GuardaEcu() {
         BarraE->setStyleSheet("QLineEdit {"
                               "border-radius: 10px;"
                               "padding: 5px;"
-                              "background-color: #b4ddd8;"
+                              "background-color: #f5c2bd;"
                               "}");
     }
 }
@@ -247,15 +298,15 @@ void MainWindow::GuardarMm(){
         return;  // Termina la función si hubo error previo en m o M
     }
 
-    // Conversión segura, dado que m y M son válidos
+    // Conversión
     bool conversionOk1, conversionOk2;
-    double minValue = m.toDouble(&conversionOk1);
-    double maxValue = M.toDouble(&conversionOk2);
+    float min = m.toFloat(&conversionOk1);
+    float max = M.toFloat(&conversionOk2);
 
     if (conversionOk1 && conversionOk2) {
-        if (minValue < maxValue) {
-            Guardarm = m;   // Guardar mínimo
-            GuardarM = M;   // Guardar máximo
+        if (min < max) {
+            Guardarm = min;   // Guardar mínimo
+            GuardarM = max;   // Guardar máximo
             BarraMin->setStyleSheet("QLineEdit {"
                                     "border-radius: 10px;"
                                     "padding: 5px;"
@@ -292,7 +343,8 @@ void MainWindow::GuardarSub(){
 
     if (match.hasMatch()) { // Verifica que la cadena contiene solo números enteros positivos
         // Si el número es válido y mayor que 0
-        GuardarS = Sub; // Guarda la subdivisión en la variable de .h
+        bool conversionOk;
+        GuardarS = Sub.toFloat(&conversionOk);  // Guarda la subdivisión en la variable de .h
         BarraS->setStyleSheet("QLineEdit {"
                                 "border-radius: 10px;"
                                 "padding: 5px;"
@@ -332,7 +384,7 @@ void MainWindow::Ejecutar() {
     try{
         // Validar y guardar la ecuación ingresada
         qDebug() << "Ejecutar() - Guardando ecuación...";
-        GuardaEcu();
+        GuardaEcu();                                                   // variables float
 
         // Validar y guardar el mínimo y el máximo
         qDebug() << "Ejecutar() - Guardando mínimo y máximo...";
@@ -352,34 +404,27 @@ void MainWindow::Ejecutar() {
 // Funcion SLOT boton Detener
 void MainWindow::ReiniciarTodo() {
     // Restablecer las variables
-    GuardarE.clear();
     BarraE->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
                           "background-color: #b4ddd8;"
                           "}");
-    GuardarS.clear();
     BarraS->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
                           "background-color: #b4ddd8;"
                           "}");
-    Guardarm.clear();
     BarraMin->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
                           "background-color: #b4ddd8;"
                           "}");
-    GuardarM.clear();
     BarraMax->setStyleSheet("QLineEdit {"
                           "border-radius: 10px;"
                           "padding: 5px;"
                           "background-color: #b4ddd8;"
                           "}");
 }
-
-MainWindow::~MainWindow() {}
-
 
 
 // Datos del glosario (nombre de la función y descripción)
@@ -447,6 +492,8 @@ void SecondWindow::mostrarDescripcion(QListWidgetItem *item) {
     QString description = item->data(Qt::UserRole).toString();
     descriptionLabel->setText("Descripción: " + description);
 }
+
+MainWindow::~MainWindow() {}
 
 SecondWindow::~SecondWindow() {}
 
