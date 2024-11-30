@@ -5,12 +5,16 @@
 #include <QMessageBox>          // Aparece otra ventan con un mensaje
 #include <QRegularExpression>   // Verifica el formato de entradas de usuario, extraer información de texto o validar datos
 #include <QDebug>
+#include <QApplication>
+#include <QtCharts/QValueAxis>
 
 #include <muParser.h>
 #include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_errno.h>
 
 mu::Parser parser;
+
+QT_CHARTS_USE_NAMESPACE
 
 int EDO(double t, const double y[], double dydt[], void *params) {
     try {
@@ -27,8 +31,28 @@ int EDO(double t, const double y[], double dydt[], void *params) {
     }
 }
 
-MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
+MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow), chart(new QChart()), chartshow(new QChartView(chart)), edo(new QLineSeries()){
     ui->setupUi(this);
+
+    // Grafico
+    chart->setTitle("DEGraph");
+    QValueAxis *axisX = new QValueAxis();
+    axisX->setTitleText("t[s]");
+    axisX->setRange(Guardarm + 1.0, GuardarM);
+
+    QValueAxis *axisY = new QValueAxis();
+    axisY->setTitleText("y");
+    axisY->setRange(0,100);
+
+    chart->addAxis(axisX, Qt::AlignBottom);
+    chart->addAxis(axisY, Qt::AlignLeft);
+
+    edo->attachAxis(axisX);
+    edo->attachAxis(axisY);
+
+    chartshow->setRenderHint(QPainter::Antialiasing);
+    chartshow->setGeometry(20,20,650,650);
+    chartshow->setParent(this);
 
     // Texto
     Titulo = new QLabel(this);
@@ -180,10 +204,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
 // Botones de ayuda
 void MainWindow::BAE(){
-    QMessageBox::information(this, " ", "La ecuacion debe tene almenos un numero o varable(x ,y o z). Ademas se pueden agregar funciones, las cuales estan disponibles en el boton con un libro, indicandole que hace cada una.");
+    QMessageBox::information(this, " ", "La ecuacion debe tene almenos un numero o variable; por estandar debe ser la letra y. Ademas se pueden agregar funciones, las cuales estan disponibles en el boton con un libro, indicandole que hace cada una.");
 }
 void MainWindow::BAMm(){
-    QMessageBox::information(this, " ", "Esto indica elrango donde se mvera la funcion en el eje y.");//no estoy segura de esto
+    QMessageBox::information(this, " ", "Esto indica el rango de evaluación de t[s].");
 }
 void MainWindow::BAS(){
     QMessageBox::information(this, " ", "Divide las lineas????");
@@ -425,7 +449,6 @@ void MainWindow::Check(int state){
 
 
 
-// Funcion SLOT boton ejecutar
 void MainWindow::Ejecutar() {
     try {
         // Guardar la ecuación y los parámetros necesarios
@@ -460,6 +483,22 @@ void MainWindow::Ejecutar() {
         double t = Guardarm;
         double t_final = GuardarM;
 
+        // Inicializar los valores mínimo y máximo de y
+        double y_min = y[0];
+        double y_max = y[0];
+
+        // Crear los ejes para el gráfico
+        QValueAxis *axisX = new QValueAxis();
+        axisX->setTitleText("t[s]");
+        axisX->setRange(Guardarm + 1.0, GuardarM);  // Rango de tiempo
+
+        QValueAxis *axisY = new QValueAxis();
+        axisY->setTitleText("y");
+        axisY->setRange(y_min, y_max);  // Rango inicial de y, que se ajustará dinámicamente
+
+        // Crear la serie de puntos para el gráfico
+        QLineSeries *series = new QLineSeries();
+
         // Realizar la integración
         while (t < t_final) {
             // Realizar un paso de integración
@@ -468,6 +507,17 @@ void MainWindow::Ejecutar() {
             // Verificar si ocurrió algún error
             if (status != GSL_SUCCESS) {
                 throw std::runtime_error("Error en la integración");
+            }
+
+            // Añadir el punto al gráfico
+            series->append(t, y[0]);
+
+            // Actualizar los valores mínimo y máximo de y
+            if (y[0] < y_min) {
+                y_min = y[0];
+            }
+            if (y[0] > y_max) {
+                y_max = y[0];
             }
 
             // Mostrar el valor de y(t) en este paso de tiempo
@@ -479,6 +529,18 @@ void MainWindow::Ejecutar() {
 
         qDebug() << "Integración terminada";
 
+        // Crear el gráfico y agregar la serie
+        QChart *chart = new QChart();
+        chart->addSeries(series);
+
+        // Establecer los ejes con los valores actualizados
+        axisY->setRange(y_min, y_max);  // Rango actualizado de y
+        chart->setAxisX(axisX, series);
+        chart->setAxisY(axisY, series);
+
+        // Agregar el gráfico a la vista del gráfico
+        chartshow->setChart(chart);
+
     } catch (const std::exception &e) {
         // Mostrar mensaje de error si ocurre alguna excepción
         QMessageBox::critical(this, "Error crítico", QString("Ocurrió un error inesperado: %1").arg(e.what()));
@@ -487,6 +549,7 @@ void MainWindow::Ejecutar() {
         QMessageBox::critical(this, "Error en ecuación", QString("Error al procesar la ecuación: %1").arg(e.GetMsg().c_str()));
     }
 }
+
 
 
 // Funcion SLOT boton Detener

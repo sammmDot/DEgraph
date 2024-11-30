@@ -17,7 +17,14 @@
 #include <QListWidget>
 #include <QCloseEvent>  // Para manejar el evento de cierre
 #include <QPixmap>
+#include <QtCharts/QChartView>
+#include <QtCharts/QLineSeries>
+#include <QValueAxis>
+#include <QtCharts/QChart>
+#include <QChart>
 
+
+QT_CHARTS_USE_NAMESPACE
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -97,6 +104,12 @@ private:
 
     // Boton de glosario
     QPushButton *BotonGlo;          // Boton para abrir un nueva ventana
+
+    // Grafico
+    QChart *chart;
+    QChartView *chartshow;
+    QLineSeries *edo;
+
 };
 
 
