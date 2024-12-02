@@ -1,119 +1,108 @@
 #include "grafico.h"
 #include <QPainter>
 #include <cmath>
-#include <iostream>
+#include <string>
 
-Grafico::Grafico(QWidget* parent) : QOpenGLWidget(parent) {}
+// Constructor
+GraficoWidget::GraficoWidget(QWidget* parent)
+    : QOpenGLWidget(parent) {}
 
-void Grafico::setPoints(const std::vector<Point>& points) {
-    userPoints = points;
-    update(); // Redibujar el widget
-}
+// Destructor
+GraficoWidget::~GraficoWidget() {}
 
-void Grafico::initializeGL() {
+// Inicializa OpenGL
+void GraficoWidget::initializeGL() {
     initializeOpenGLFunctions();
-    glDisable(GL_DEPTH_TEST); // Deshabilitar la profundidad porque es 2D
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Fondo blanco
+
+    performIntegration(); // Realizar integración al iniciar
 }
 
-void Grafico::resizeGL(int w, int h) {
+// Ajusta el tamaño del viewport
+void GraficoWidget::resizeGL(int w, int h) {
     glViewport(0, 0, w, h);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    float aspect = static_cast<float>(w) / h;
-
-    // Rango para centrar la vista
-    float rangeX = 100.0f * aspect;
-    float rangeY = 100.0f;
-
-    // Proyección ortográfica centrada
-    glOrtho(-rangeX, rangeX, -rangeY, rangeY, -1.0, 1.0);
+    gluOrtho2D(-0.5, 10.5, -0.1, 1.1); // Configuración de las coordenadas
 }
 
-void Grafico::paintGL() {
+// Dibuja el contenido del widget
+void GraficoWidget::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Dibujar ejes y la curva cuadrática
-    drawAxes();
-    renderQuadraticCurve(); // Solo esta curva
-
-    if (userPoints.size() >= 2) {
-        renderDistanceBetweenPoints(userPoints[0], userPoints[1]);
-    }
+    drawAxesWithLabels();    // Dibujar ejes
+    renderIntegrationPoints(); // Dibujar puntos
 }
 
-void Grafico::drawText(const QString& text, float x, float y) {
-    QPainter painter(this);
-
-    // Transformar coordenadas OpenGL a coordenadas de ventana
-    QPointF screenPoint = mapFromGlobal(QPointF(x, y).toPoint());
-    painter.setPen(Qt::black);
-    painter.drawText(screenPoint, text);
-    painter.end();
-}
-
-void Grafico::drawAxes() {
-    // Dibujar ejes X e Y
-    glBegin(GL_LINES);
-
-    // Eje X (Rojo)
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex2f(-100.0f, 0.0f);
-    glVertex2f(100.0f, 0.0f);
-
-    // Eje Y (Verde)
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex2f(0.0f, -100.0f);
-    glVertex2f(0.0f, 100.0f);
-
-    glEnd();
-
-    // Dibujar números en los ejes usando QPainter
-    QPainter painter(this);
-    painter.setPen(Qt::black);
-    painter.setFont(QFont("Arial", 7));
-
-    int w = width();   // Ancho de la ventana
-    int h = height();  // Alto de la ventana
-
-    // Transformación de coordenadas
-    auto worldToScreen = [&](float x, float y) -> QPointF {
-        float screenX = (x + 100) / 200.0f * w;
-        float screenY = h - ((y + 100) / 200.0f * h); // OpenGL (abajo) a Qt (arriba)
-        return QPointF(screenX, screenY);
+// Realiza la integración numérica
+void GraficoWidget::performIntegration() {
+    gsl_odeiv2_system sys = {
+        [](double t, const double y[], double dydt[], void*) -> int {
+            dydt[0] = std::sin(t) - y[0];
+            return GSL_SUCCESS;
+        },
+        nullptr, 1, nullptr
     };
 
-    // Números en el eje X
-    for (int x = -100; x <= 100; x += 10) {
-        if (x == 0) continue; // Saltar el origen
-        QPointF screenPos = worldToScreen(x, -2); // Ajuste de altura (-2 para centrar)
-        painter.drawText(screenPos, QString::number(x));
+    const gsl_odeiv2_step_type* T = gsl_odeiv2_step_rkf45;
+    gsl_odeiv2_driver* d = gsl_odeiv2_driver_alloc_y_new(&sys, T, 0.1, 1e-6, 1e-6);
+
+    double y[1] = {1.0};
+    double t = 0.0;
+    double t1 = 10.0;
+    int num_points = 1000;
+    double dt = t1 / (num_points - 1);
+
+    for (int i = 0; i < num_points; i++) {
+        double t_actual = i * dt;
+        gsl_odeiv2_driver_apply(d, &t, t_actual, y);
+        integrationPoints.push_back({static_cast<float>(t), static_cast<float>(y[0])});
     }
 
-    // Números en el eje Y
-    for (int y = -100; y <= 100; y += 10) {
-        if (y == 0) continue; // Saltar el origen
-        QPointF screenPos = worldToScreen(-5, y); // Ajuste de ancho (-5 para centrar)
-        painter.drawText(screenPos, QString::number(y));
-    }
-
-    painter.end();
+    gsl_odeiv2_driver_free(d);
 }
 
-void Grafico::renderQuadraticCurve() {
-    // Dibuja la curva cuadrática
-    glColor3f(1.0f, 0.0f, 0.0f); // Rojo
+// Dibuja los ejes y sus etiquetas
+void GraficoWidget::drawAxesWithLabels() {
+    glBegin(GL_LINES);
 
-    glBegin(GL_LINE_STRIP);
-    for (float x = -100.0f; x <= 100.0f; x += 0.1f) {
-        float y = 0.01f * x * x;  // y = x^2
-        glVertex2f(x, y);
+    // Eje X
+    glColor3f(0.0f, 0.0f, 0.0f); // Negro
+    glVertex2f(-0.1f, 0.0f);
+    glVertex2f(10.5f, 0.0f);
+
+    // Eje Y
+    glVertex2f(0.0f, -0.1f);
+    glVertex2f(0.0f, 1.1f);
+
+    glEnd();
+
+    // Dibujar etiquetas
+    QPainter painter(this);
+    painter.setPen(Qt::black);
+
+    // Etiquetas del eje X
+    for (int i = 0; i <= 10; ++i) {
+        QString label = QString::number(i);
+        painter.drawText(QPointF(i * width() / 10.0, height() / 2.0 - 10), label);
+    }
+
+    // Etiquetas del eje Y
+    for (int i = 0; i <= 10; ++i) {
+        QString label = QString::number(i / 10.0, 'f', 1);
+        painter.drawText(QPointF(width() / 2.0 - 30, height() - i * height() / 10.0), label);
+    }
+}
+
+// Dibuja los puntos de integración
+void GraficoWidget::renderIntegrationPoints() {
+    glColor3f(0.0f, 0.0f, 1.0f); // Azul para los puntos
+    glPointSize(4.0f);
+
+    glBegin(GL_POINTS);
+    for (const auto& point : integrationPoints) {
+        glVertex2f(point.x, point.y);
     }
     glEnd();
-}
-
-void Grafico::renderDistanceBetweenPoints(const Point& p1, const Point& p2) {
-    float distance = sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
-    QString text = QString("Distancia: %1").arg(distance);
-    drawText(text, (p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
 }
