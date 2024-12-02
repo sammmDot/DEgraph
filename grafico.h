@@ -1,35 +1,42 @@
-#ifndef GRAFICO_H
-#define GRAFICO_H
+#ifndef GRAFICOWIDGET_H
+#define GRAFICOWIDGET_H
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <vector>
-#include <QString>
 
-// Estructura para representar un punto en 2D
+#include <GL/glu.h>
+#include <muParser.h>
+#include <gsl/gsl_odeiv2.h>
+#include <gsl/gsl_errno.h>
+
+
+// Estructura para almacenar puntos 2D
 struct Point {
     float x, y;
 };
 
-class Grafico : public QOpenGLWidget, protected QOpenGLFunctions {
+class GraficoWidget : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT
 
 public:
-    explicit Grafico(QWidget* parent = nullptr);
-    void setPoints(const std::vector<Point>& points);
+    explicit GraficoWidget(QWidget* parent = nullptr);
+    ~GraficoWidget();
 
 protected:
+    // Métodos principales de OpenGL
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
 private:
-    std::vector<Point> userPoints;
+    // Métodos auxiliares
+    void performIntegration(); // Realizar la integración
+    void drawAxesWithLabels(); // Dibujar los ejes
+    void renderIntegrationPoints(); // Dibujar los puntos
 
-    void drawText(const QString& text, float x, float y);
-    void drawAxes();
-    void renderQuadraticCurve(); // Mantener solo la curva cuadrática
-    void renderDistanceBetweenPoints(const Point& p1, const Point& p2);
+    // Variables
+    std::vector<Point> integrationPoints; // Puntos generados por la integración
 };
 
-#endif // GRAFICO_H
+#endif // GRAFICOWIDGET_H
