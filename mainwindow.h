@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "grafico.h"
 #include <QMainWindow>
 #include <QMainWindow>
 #include <QWidget>
@@ -97,6 +98,9 @@ private:
 
     // Boton de glosario
     QPushButton *BotonGlo;          // Boton para abrir un nueva ventana
+
+    //Grafico
+    Grafico *graf;
 };
 
 
