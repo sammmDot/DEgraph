@@ -4,10 +4,11 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <vector>
-#include <string>
+#include <QString>
 
+// Estructura para representar un punto en 2D
 struct Point {
-    float x, y, z;
+    float x, y;
 };
 
 class Grafico : public QOpenGLWidget, protected QOpenGLFunctions {
@@ -24,11 +25,10 @@ protected:
 
 private:
     std::vector<Point> userPoints;
-    void drawText(const QString& text, float x, float y, float z);
+
+    void drawText(const QString& text, float x, float y);
     void drawAxes();
-    void renderParametricCurve();
-    void renderQuadraticCurve();
-    void renderUserPoints();
+    void renderQuadraticCurve(); // Mantener solo la curva cuadrática
     void renderDistanceBetweenPoints(const Point& p1, const Point& p2);
 };
 
