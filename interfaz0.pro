@@ -20,7 +20,7 @@ RESOURCES += imagenes.qrc
 QRC
 
 # Bibliotecas
-INCLUDEPATH += /home/usuario/Qt/6.7.3/gcc_64
-
+INCLUDEPATH += /home/xime/Qt/6.7.3/gcc_64
 LIBS += -L/usr/lib/x86_64-linux-gnu -lGL -lGLU
+
 
