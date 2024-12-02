@@ -9,6 +9,9 @@
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
 
+    graf = new Grafico(this);
+    graf->setGeometry(20, 20, 650, 650); // Usar geometría para establecer posición y tamaño
+
     // Texto
     Titulo = new QLabel(this);
     QPixmap pixmap(":/logo/Logo.png");// Cargar la imagen desde un archivo
@@ -49,8 +52,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAMm = new QPushButton("i", this);
     // Caracteristicas del boton
     BotonAMm->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
-                           "QPushButton:hover {""background-color: #c0c0c0;""}"
-                           "QPushButton:pressed {""background-color: #c0c0c0;""}");
+                            "QPushButton:hover {""background-color: #c0c0c0;""}"
+                            "QPushButton:pressed {""background-color: #c0c0c0;""}");
     BotonAMm->setGeometry(815, 305, 18, 18);  // Ubicacion
     // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
     connect(BotonAMm, &QPushButton::clicked, this, &MainWindow::BAMm);
@@ -67,8 +70,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAZ = new QPushButton("i", this);
     // Caracteristicas del boton
     BotonAZ->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
-                            "QPushButton:hover {""background-color: #c0c0c0;""}"
-                            "QPushButton:pressed {""background-color: #c0c0c0;""}");
+                           "QPushButton:hover {""background-color: #c0c0c0;""}"
+                           "QPushButton:pressed {""background-color: #c0c0c0;""}");
     BotonAZ->setGeometry(770, 505, 18, 18);  // Ubicacion
     // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
     connect(BotonAZ, &QPushButton::clicked, this, &MainWindow::BAZ);
@@ -103,10 +106,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BarraS = new QLineEdit(this);              // Crea la barra de texto
     //Caracterristicas de la barra
     BarraS->setStyleSheet("QLineEdit {"
-                            "border-radius: 10px;"
-                            "padding: 5px;"
-                            "background-color: #b4ddd8;"
-                            "}");
+                          "border-radius: 10px;"
+                          "padding: 5px;"
+                          "background-color: #b4ddd8;"
+                          "}");
     BarraS->setGeometry(700, 400, 200, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
 
     // Boton check
@@ -130,7 +133,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAlto->setStyleSheet("QPushButton{""border-radius: 10px;""background-color: #f1a8a8;""font-weight: bold;""}"
                              "QPushButton:hover {""background-color: #ed8c9f;""}"
                              "QPushButton:pressed {""background-color: #ed8c9f;""}"
-                            );
+                             );
     BotonAlto->setGeometry(850, 600, 100, 50);  // Ubicacion
 
     connect(BotonAlto, &QPushButton::clicked, this, &MainWindow::ReiniciarTodo);  // Conectar el clic del botón al slot ReiniciarTodo
@@ -177,8 +180,8 @@ void MainWindow::Autocompletar()
 {
     //lista de comandos para las funciones matematicas de la bibloteca cmat
     QStringList commands = {"sin()", "cos()", "tan()", "asin()", "acos()", "atan()", "atan2()",
-                            "sinh()", "cosh()", "tanh()", "asinh()", "acosh()", "atanh()", "exp()",
-                            "log()", "log10()", "log2()", "pow()", "sqrt()", "floor()", "round()"
+        "sinh()", "cosh()", "tanh()", "asinh()", "acosh()", "atanh()", "exp()",
+        "log()", "log10()", "log2()", "pow()", "sqrt()", "floor()", "round()"
     };
 
     // Crear el modelo para el autocompletar con la lista de comandos
@@ -193,10 +196,10 @@ void MainWindow::Autocompletar()
     BarraE = new QLineEdit(this);             // Crea la barra de texto
     //Caracterristicas de la barra
     BarraE->setStyleSheet("QLineEdit {"
-                            "border-radius: 10px;"
-                            "padding: 5px;"
-                            "background-color: #b4ddd8;"
-                            "}");
+                          "border-radius: 10px;"
+                          "padding: 5px;"
+                          "background-color: #b4ddd8;"
+                          "}");
     BarraE->setGeometry(700, 200, 200, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
     BarraE->setCompleter(completar);
 }
@@ -346,10 +349,10 @@ void MainWindow::GuardarSub(){
         bool conversionOk;
         GuardarS = Sub.toFloat(&conversionOk);  // Guarda la subdivisión en la variable de .h
         BarraS->setStyleSheet("QLineEdit {"
-                                "border-radius: 10px;"
-                                "padding: 5px;"
-                                "background-color: #b4ddd8;"
-                                "}");
+                              "border-radius: 10px;"
+                              "padding: 5px;"
+                              "background-color: #b4ddd8;"
+                              "}");
     } else {
         // Si el valor no es válido
         if (Sub == ""){
@@ -415,15 +418,15 @@ void MainWindow::ReiniciarTodo() {
                           "background-color: #b4ddd8;"
                           "}");
     BarraMin->setStyleSheet("QLineEdit {"
-                          "border-radius: 10px;"
-                          "padding: 5px;"
-                          "background-color: #b4ddd8;"
-                          "}");
+                            "border-radius: 10px;"
+                            "padding: 5px;"
+                            "background-color: #b4ddd8;"
+                            "}");
     BarraMax->setStyleSheet("QLineEdit {"
-                          "border-radius: 10px;"
-                          "padding: 5px;"
-                          "background-color: #b4ddd8;"
-                          "}");
+                            "border-radius: 10px;"
+                            "padding: 5px;"
+                            "background-color: #b4ddd8;"
+                            "}");
 }
 
 
@@ -496,4 +499,3 @@ void SecondWindow::mostrarDescripcion(QListWidgetItem *item) {
 MainWindow::~MainWindow() {}
 
 SecondWindow::~SecondWindow() {}
-
