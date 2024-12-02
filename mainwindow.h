@@ -40,7 +40,6 @@ public:
     void GuardarMm();                       // Guardar el maximo y el minimo
     void GuardarSub();                      // Valida y guardan las subdivisiones
     void Autocompletar();                   // Inicialisa el autocompletado
-    void Grafico2D();
 
 private slots:
     // Slots para botones de ayuda al usuario
@@ -101,7 +100,7 @@ private:
     QPushButton *BotonGlo;          // Boton para abrir un nueva ventana
 
     //Grafico
-    Grafico *graf;
+    GraficoWidget *graf;
 };
 
 
