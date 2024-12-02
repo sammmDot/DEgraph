@@ -40,6 +40,7 @@ public:
     void GuardarMm();                       // Guardar el maximo y el minimo
     void GuardarSub();                      // Valida y guardan las subdivisiones
     void Autocompletar();                   // Inicialisa el autocompletado
+    void Grafico2D();
 
 private slots:
     // Slots para botones de ayuda al usuario
@@ -69,7 +70,7 @@ private:
     // Relacionado con ingreso de ecuacion
     QLabel *tituloE;               // Titulo de la ecuacion
     QLineEdit *BarraE;             // Barra de texto para ingresar la ecuación
-    float GuardarE;              // Variable para almacenar la ecuación
+    QString GuardarE;              // Variable para almacenar la ecuación
     QStringListModel *model;       // Agrega una lista
     QCompleter *completar;         // Completa las funciones matematicas
 
