@@ -5,13 +5,16 @@
 #include <QMessageBox>          // Aparece otra ventan con un mensaje
 #include <QRegularExpression>   // Verifica el formato de entradas de usuario, extraer información de texto o validar datos
 
+#include <muParser.h>
+#include <gsl/gsl_odeiv2.h>
+#include <gsl/gsl_errno.h>
+
+mu::Parser parser;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
-
     graf = new Grafico(this);
     graf->setGeometry(20, 20, 650, 650); // Usar geometría para establecer posición y tamaño
-
     // Texto
     Titulo = new QLabel(this);
     QPixmap pixmap(":/logo/Logo.png");// Cargar la imagen desde un archivo
@@ -75,9 +78,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAZ->setGeometry(770, 505, 18, 18);  // Ubicacion
     // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
     connect(BotonAZ, &QPushButton::clicked, this, &MainWindow::BAZ);
-
-
-
     // Funcion para barra de ecuaciones
     Autocompletar();
 
@@ -161,19 +161,19 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 }
 
 // Botones de ayuda
+
 void MainWindow::BAE(){
-    QMessageBox::information(this, " ", "La ecuacion debe tene almenos un numero o varable(x ,y o z). Ademas se pueden agregar funciones, las cuales estan disponibles en el boton con un libro, indicandole que hace cada una.");
+    QMessageBox::information(this, " ", "La ecuacion debe tene almenos un numero o variable; por estandar debe ser la letra y. Ademas se pueden agregar funciones, las cuales estan disponibles en el boton con un libro, indicandole que hace cada una.");
 }
 void MainWindow::BAMm(){
-    QMessageBox::information(this, " ", "Esto indica elrango donde se mvera la funcion en el eje y.");//no estoy segura de esto
+    QMessageBox::information(this, " ", "Esto indica el rango de evaluación de t[s].");
 }
 void MainWindow::BAS(){
-    QMessageBox::information(this, " ", "Divide las lineas????");
+    QMessageBox::information(this, " ", "Salto de valores en los ejes.");
 }
 void MainWindow::BAZ(){
-    QMessageBox::information(this, " ", "Si el check esta activado, este mostrara un grafico con trs ejes, ose que sera de tres dimenciones. En cambio, si esta desactivado, el grafico solo mostrara dos eje, siendo asi de dos dimensiones");
+    QMessageBox::information(this, " ", "Si el check esta activado, este mostrara un grafico con tres ejes, ose que sera de tres dimenciones. En cambio, si esta desactivado, el grafico solo mostrara dos eje, siendo asi de dos dimensiones");
 }
-
 
 // Valida y guarda la ecuacion
 void MainWindow::Autocompletar()
@@ -205,29 +205,54 @@ void MainWindow::Autocompletar()
 }
 
 void MainWindow::GuardaEcu() {
-    QString Ecua = BarraE->text();
+    QString Ecua = BarraE->text().trimmed();
 
-    QRegularExpression regex("^\\s*([\\dx+yz\\-*/^()\\s]+|(\\b(?:sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|log|log10|log2|pow|sqrt|floor|round|copysign)\\b\\s*\\(\\s*[\\dx+yz\\-*/^()\\s]+\\)))+$"); // Incluye x, y, z y al menos un número
+    // Expresión regular para validar la ecuación
+    QRegularExpression regex("^\\s*([\\dx+yz\\-*/^()\\s]+|(\\b(?:sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|log|log10|log2|pow|sqrt|floor|round|copysign)\\b\\s*\\(\\s*[\\dx+yz\\-*/^()\\s]+\\)))+$");
     QRegularExpressionMatch match = regex.match(Ecua);
 
     // Verificar que contenga al menos un número o variable (x, y, z)
     bool contieneNumero = Ecua.contains(QRegularExpression("[\\dxyz]"));
 
-    if (match.hasMatch() && contieneNumero) { // Verifica que contenga solo caracteres válidos y al menos un número
-        // Si la ecuación es válida
-        BarraE->setStyleSheet("QLineEdit {"
-                              "border-radius: 10px;"
-                              "padding: 5px;"
-                              "background-color: #b4ddd8;"
-                              "}");
-        bool conversionOk;
-        GuardarE = Ecua.toFloat(&conversionOk);  // Guardar la ecuación en la variable creada en .h
+    if (match.hasMatch() && contieneNumero) {
+        try {
+            // Inicializa el parser de muParser
+            double y_value = 0.0;
+            parser.DefineVar("y", &y_value);
+
+            // Agrega constantes matemáticas
+            parser.DefineConst("pi", M_PI);
+            parser.DefineConst("e", M_E);
+
+            // Convierte QString a std::string para SetExpr
+            parser.SetExpr(Ecua.toStdString());
+
+            // Si la ecuación es válida, guarda en GuardarE
+            qDebug() << "Ecuación: " << GuardarE;
+            GuardarE = Ecua; // Si GuardarE es QString
+            qDebug() << "Ecuación: " << GuardarE;
+
+            // Cambiar estilo del QLineEdit
+            BarraE->setStyleSheet("QLineEdit {"
+                                  "border-radius: 10px;"
+                                  "padding: 5px;"
+                                  "background-color: #b4ddd8;"
+                                  "}");
+        } catch (mu::ParserError &e) {
+            // Si ocurre un error en muParser
+            QMessageBox::warning(this, "Error", QString("Error en la ecuación: %1").arg(e.GetMsg().c_str()));
+            BarraE->setStyleSheet("QLineEdit {"
+                                  "border-radius: 10px;"
+                                  "padding: 5px;"
+                                  "background-color: #f5c2bd;"
+                                  "}");
+        }
     } else {
-        // La ecuación no es válida
+        // Ecuación no válida
         if (Ecua.isEmpty()) {
             QMessageBox::warning(this, "Error", "No ingresó la ecuación.");
         } else {
-            QMessageBox::warning(this, "Error", "La ecuación ingresada no es válida. Por favor, usa solo números, operadores básicos, variables (x, y, z), y funciones válidas como sin(), cos(), etc(Las puedes encontrar en el glosario).");
+            // QMessageBox::warning(this, "Error", "La ecuación ingresada no es válida.");
         }
         BarraE->setStyleSheet("QLineEdit {"
                               "border-radius: 10px;"
@@ -237,13 +262,27 @@ void MainWindow::GuardaEcu() {
     }
 }
 
+int EDO(double t, const double y[], double dydt[], void *params) {
+    try {
+        // Configurar las variables del parser
+        parser.DefineVar("t", &t);
+        parser.DefineVar("y", const_cast<double*>(&y[0]));  // muParser necesita un puntero no constante
+
+        // Evaluar la ecuación almacenada en GuardarE
+        dydt[0] = parser.Eval();
+        return GSL_SUCCESS;
+    } catch (mu::Parser::exception_type &e) {
+        qCritical() << "Error en el parser:" << QString::fromStdString(e.GetMsg());
+        return GSL_EBADFUNC;
+    }
+}
 
 // Funciones para validar las variables del minimo y el maximo
 QString MainWindow::Confirmarm(){
     QString m = BarraMin->text();
 
     bool conversionOk;
-    double minValue = m.toDouble(&conversionOk);  // Intenta convertir m a número
+    double minValue = m.toFloat(&conversionOk);  // Intenta convertir m a número
 
     if (!conversionOk) {  // Si falla la conversión
         if (m.isEmpty()) {
@@ -265,13 +304,11 @@ QString MainWindow::Confirmarm(){
                             "}");
     return m;  // Devuelve el valor si es válido
 }
-
 QString MainWindow::ConfirmarM(){
     QString M = BarraMax->text();
 
     bool conversionOk;
     double maxValue = M.toDouble(&conversionOk);  // Intenta convertir M a número
-
     if (!conversionOk) {  // Si falla la conversión
         if (M.isEmpty()) {
             QMessageBox::warning(this, "Error", "No ingresó el máximo.");
@@ -292,7 +329,6 @@ QString MainWindow::ConfirmarM(){
                             "}");
     return M;  // Devuelve el valor si es válido
 }
-
 void MainWindow::GuardarMm(){
     QString m = Confirmarm();
     QString M = ConfirmarM();
@@ -336,7 +372,6 @@ void MainWindow::GuardarMm(){
     }
 }
 
-
 // Validacion y guardado de la variable de la subdivision
 void MainWindow::GuardarSub(){
     QString Sub = BarraS->text();
@@ -360,16 +395,10 @@ void MainWindow::GuardarSub(){
             QMessageBox::warning(this, "Error", "No ingresó la subdivisión.");
         } else {
             // Error por ingresar un valor no permitido
-            QMessageBox::warning(this, "Error", "La subdivisión debe ser un número entero mayor que 0.");
+            QMessageBox::warning(this, "Error", "La subdivisión debe ser un número entero mayor que 0");
         }
-        BarraS->setStyleSheet("QLineEdit {"
-                              "border-radius: 10px;"
-                              "padding: 5px;"
-                              "background-color: #f5c2bd;"
-                              "}");
     }
 }
-
 
 // Funcion del boton check
 void MainWindow::Check(int state){
@@ -380,29 +409,108 @@ void MainWindow::Check(int state){
     }
 }
 
+void MainWindow:: Grafico2D(){
+    // Obtener el rango mínimo y máximo del usuario
+    float minimo = Guardarm;
+    float maximo = GuardarM;
 
+    // Obtener la función ingresada por el usuario
+    float funcion = GuardarE;
+
+    // Establecer el rango en el gráfico
+    graf->setRango(minimo, maximo);
+    void ActualizarG();
+    // Parsear la función y graficarla
+    // Aquí necesitamos hacer un pequeño procesamiento para permitir funciones como 'sin(x)', 'cos(x)', etc.
+    auto evaluarFuncion = [this, funcion](double x) -> double {
+        // Si la función contiene 'sin' o 'cos', evaluamos con la función estándar
+        float func = funcion;
+        func.replace("x", QString::number(x)); // Sustituir 'x' por el valor actual
+        if (func.contains("sin"))
+            return sin(x);  // Por ahora solo soportamos sin(x)
+        else if (func.contains("cos"))
+            return cos(x);  // Y cos(x)
+        else
+            return 0.0;  // Si no se reconoce la función, no hacer nada
+    };
+    graf->setFuncion(evaluarFuncion);  // Establecer la función que el gráfico debe graficar
+    graf->update();  // Actualizar el gráfico
+}
 
 // Funcion SLOT boton ejecutar
 void MainWindow::Ejecutar() {
-    try{
-        // Validar y guardar la ecuación ingresada
-        qDebug() << "Ejecutar() - Guardando ecuación...";
-        GuardaEcu();                                                   // variables float
+    try {
+        // Guardar la ecuación y los parámetros necesarios
+        qDebug() << "Ejecutar() - Configurando ecuación...";
+        GuardaEcu();  // Guardar la ecuación en GuardarE
 
-        // Validar y guardar el mínimo y el máximo
         qDebug() << "Ejecutar() - Guardando mínimo y máximo...";
-        GuardarMm();
+        GuardarMm();  // Guardar los valores mínimo y máximo
 
-        // Validar y guardar la subdivisión
-        qDebug() << "Ejecutar() - Guardando subdivisión...";
-        GuardarSub();
+        qDebug() << "Ejecutar() - Configurando subdivisión...";
+        GuardarSub();  // Guardar subdivisión si es necesario
 
-        qDebug() << "Ejecutar() - Fin de la función Ejecutar";
+        // Configurar el parser con la ecuación ingresada
+        parser.SetExpr(GuardarE.toStdString());  // Convertir QString a std::string
+
+        // Establecer el sistema de ecuaciones a resolver
+        gsl_odeiv2_system sys = {EDO, NULL, 1, NULL};
+
+        // Inicializar el contexto de la integración
+        gsl_odeiv2_driver *driver = gsl_odeiv2_driver_alloc_y_new(
+            &sys,
+            gsl_odeiv2_step_rk8pd,  // Método de Runge-Kutta de 8° orden
+            1e-6,  // Precisión de la integración
+            1e-6,  // Precisión relativa
+            0.0    // Tolerancia absoluta
+            );
+
+        // Inicializar el valor de y (condición inicial)
+        double y[1] = {1.0};  // Ejemplo: valor inicial para y(Guardarm)
+
+        // Establecer el tiempo inicial y final
+        double t = Guardarm;
+        double t_final = GuardarM;
+
+        // Inicializar los valores mínimo y máximo de y
+        double y_min = y[0];
+        double y_max = y[0];
+
+        // Realizar la integración
+        while (t < t_final) {
+            // Realizar un paso de integración
+            int status = gsl_odeiv2_driver_apply(driver, &t, t + 1.0, y);  // Incrementar por 1 segundo
+
+            // Verificar si ocurrió algún error
+            if (status != GSL_SUCCESS) {
+                throw std::runtime_error("Error en la integración");
+            }
+
+            // Actualizar los valores mínimo y máximo de y
+            if (y[0] < y_min) {
+                y_min = y[0];
+            }
+            if (y[0] > y_max) {
+                y_max = y[0];
+            }
+
+            // Mostrar el valor de y(t) en este paso de tiempo
+            qDebug() << "Tiempo: " << t << " Valor de y: " << y[0];
+        }
+
+        // Liberar el contexto del driver después de la integración
+        gsl_odeiv2_driver_free(driver);
+
+        qDebug() << "Integración terminada";
+
     } catch (const std::exception &e) {
+        // Mostrar mensaje de error si ocurre alguna excepción
         QMessageBox::critical(this, "Error crítico", QString("Ocurrió un error inesperado: %1").arg(e.what()));
+    } catch (mu::Parser::exception_type &e) {
+        // Mostrar mensaje de error específico del parser
+        QMessageBox::critical(this, "Error en ecuación", QString("Error al procesar la ecuación: %1").arg(e.GetMsg().c_str()));
     }
 }
-
 
 // Funcion SLOT boton Detener
 void MainWindow::ReiniciarTodo() {
@@ -428,28 +536,41 @@ void MainWindow::ReiniciarTodo() {
                             "background-color: #b4ddd8;"
                             "}");
 }
-
-
-// Datos del glosario (nombre de la función y descripción)
-QMap<QString, QString> crearGlosario() {
-    QMap<QString, QString> glossary;
-    glossary["abs"] = "Devuelve el valor absoluto de un número.";
-    glossary["acos"] = "Devuelve el arco coseno de un valor en radianes.";
-    glossary["asin"] = "Devuelve el arco seno de un valor en radianes.";
-    glossary["atan"] = "Devuelve el arco tangente de un valor en radianes.";
-    glossary["cos"] = "Devuelve el coseno de un ángulo (en radianes).";
-    glossary["sin"] = "Devuelve el seno de un ángulo (en radianes).";
-    glossary["tan"] = "Devuelve la tangente de un ángulo (en radianes).";
-    glossary["sqrt"] = "Devuelve la raíz cuadrada de un número.";
-    glossary["log"] = "Devuelve el logaritmo natural (base e) de un número.";
-    glossary["pow"] = "Eleva un número base a una potencia específica.";
-    return glossary;
-}
+MainWindow::~MainWindow() {}
 
 // Función para abrir la segunda ventana
 void MainWindow::Glosario() {
     SecondWindow *newWindow = new SecondWindow();
     newWindow->show();
+}
+
+// Datos del glosario (nombre de la función y descripción)
+QMap<QString, QString> crearGlosario() {
+    QMap<QString, QString> glossary;
+    glossary["sin()"] = "Devuelve el seno de un ángulo (en radianes).";
+    glossary["cos()"] = "Devuelve el coseno de un ángulo (en radianes).";
+    glossary["tan()"] = "Devuelve la tangente de un ángulo (en radianes).";
+    glossary["asin()"] = "Devuelve el arco seno de un valor en radianes.";
+    glossary["acos()"] = "Devuelve el arco coseno de un valor en radianes.";
+    glossary["atan()"] = "Devuelve el arco tangente de un valor en radianes.";
+    glossary["atan2()"] = "Devuelve el arco tangente de dos valores.";
+    glossary["sinh()"] = "Devuelve el seno hiperbólico de un ángulo.";
+    glossary["cosh()"] = "Devuelve el coseno hiperbólico de un ángulo.";
+    glossary["tanh()"] = "Devuelve la tangente hiperbólica de un ángulo.";
+    glossary["asinh()"] = "Devuelve el arco seno hiperbólico de un valor.";
+    glossary["acosh()"] = "Devuelve el arco coseno hiperbólico de un valor.";
+    glossary["atanh()"] = "Devuelve el arco tangente hiperbólica de un valor.";
+    glossary["exp()"] = "Devuelve el valor de e elevado a la potencia de un número.";
+    glossary["log()"] = "Devuelve el logaritmo natural (base e) de un número.";
+    glossary["log10()"] = "Devuelve el logaritmo en base 10 de un número.";
+    glossary["log2()"] = "Devuelve el logaritmo en base 2 de un número.";
+    glossary["pow()"] = "Eleva un número base a una potencia específica.";
+    glossary["sqrt()"] = "Devuelve la raíz cuadrada de un número.";
+    glossary["floor()"] = "Devuelve el entero más cercano menor o igual al número.";
+    glossary["round()"] = "Devuelve el valor redondeado al número entero más cercano.";
+    glossary["pi"] = "El valor de pi, aproximadamente 3.14159.";
+    glossary["e"] = "El valor de la constante e, aproximadamente 2.71828.";
+    return glossary;
 }
 
 // Implementación de SecondWindow
@@ -495,7 +616,5 @@ void SecondWindow::mostrarDescripcion(QListWidgetItem *item) {
     QString description = item->data(Qt::UserRole).toString();
     descriptionLabel->setText("Descripción: " + description);
 }
-
-MainWindow::~MainWindow() {}
 
 SecondWindow::~SecondWindow() {}
