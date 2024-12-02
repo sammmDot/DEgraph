@@ -5,6 +5,8 @@
 #include <QMessageBox>          // Aparece otra ventan con un mensaje
 #include <QRegularExpression>   // Verifica el formato de entradas de usuario, extraer información de texto o validar datos
 #include <QDebug>
+#include <QApplication>
+#include <QtCharts/QValueAxis>
 
 #include <muParser.h>
 #include <gsl/gsl_odeiv2.h>
@@ -12,11 +14,17 @@
 
 mu::Parser parser;
 
+QT_CHARTS_USE_NAMESPACE
+
 int EDO(double t, const double y[], double dydt[], void *params) {
     try {
         // Configurar las variables del parser
         parser.DefineVar("t", &t);
         parser.DefineVar("y", const_cast<double*>(&y[0]));  // muParser necesita un puntero no constante
+
+        // Asegurar que las constantes están definidas
+        parser.DefineConst("pi", M_PI);
+        parser.DefineConst("e", M_E);
 
         // Evaluar la ecuación almacenada en GuardarE
         dydt[0] = parser.Eval();
@@ -27,8 +35,28 @@ int EDO(double t, const double y[], double dydt[], void *params) {
     }
 }
 
-MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
+MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow), chart(new QChart()), chartshow(new QChartView(chart)), edo(new QLineSeries()){
     ui->setupUi(this);
+
+    // Grafico
+    chart->setTitle("DEGraph");
+    QValueAxis *axisX = new QValueAxis();
+    axisX->setTitleText("t[s]");
+    axisX->setRange(Guardarm + 1.0, GuardarM);
+
+    QValueAxis *axisY = new QValueAxis();
+    axisY->setTitleText("y");
+    axisY->setRange(0,100);
+
+    chart->addAxis(axisX, Qt::AlignBottom);
+    chart->addAxis(axisY, Qt::AlignLeft);
+
+    edo->attachAxis(axisX);
+    edo->attachAxis(axisY);
+
+    chartshow->setRenderHint(QPainter::Antialiasing);
+    chartshow->setGeometry(20,20,650,650);
+    chartshow->setParent(this);
 
     // Texto
     Titulo = new QLabel(this);
@@ -180,10 +208,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
 // Botones de ayuda
 void MainWindow::BAE(){
-    QMessageBox::information(this, " ", "La ecuacion debe tene almenos un numero o varable(x ,y o z). Ademas se pueden agregar funciones, las cuales estan disponibles en el boton con un libro, indicandole que hace cada una.");
+    QMessageBox::information(this, " ", "La ecuacion debe tene almenos un numero o variable; por estandar debe ser la letra y. Ademas se pueden agregar funciones, las cuales estan disponibles en el boton con un libro, indicandole que hace cada una.");
 }
 void MainWindow::BAMm(){
-    QMessageBox::information(this, " ", "Esto indica elrango donde se mvera la funcion en el eje y.");//no estoy segura de esto
+    QMessageBox::information(this, " ", "Esto indica el rango de evaluación de t[s].");
 }
 void MainWindow::BAS(){
     QMessageBox::information(this, " ", "Divide las lineas????");
@@ -198,8 +226,9 @@ void MainWindow::Autocompletar()
 {
     //lista de comandos para las funciones matematicas de la bibloteca cmat
     QStringList commands = {"sin()", "cos()", "tan()", "asin()", "acos()", "atan()", "atan2()",
-                            "sinh()", "cosh()", "tanh()", "asinh()", "acosh()", "atanh()", "exp()",
-                            "log()", "log10()", "log2()", "pow()", "sqrt()", "floor()", "round()"
+        "sinh()", "cosh()", "tanh()", "asinh()", "acosh()", "atanh()", "exp()",
+        "log()", "log10()", "log2()", "pow()", "sqrt()", "floor()", "round()",
+        "pi", "e"
     };
 
     // Crear el modelo para el autocompletar con la lista de comandos
@@ -222,15 +251,16 @@ void MainWindow::Autocompletar()
     BarraE->setCompleter(completar);
 }
 
+
 void MainWindow::GuardaEcu() {
     QString Ecua = BarraE->text().trimmed();
 
-    // Expresión regular para validar la ecuación
-    QRegularExpression regex("^\\s*([\\dx+yz\\-*/^()\\s]+|(\\b(?:sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|log|log10|log2|pow|sqrt|floor|round|copysign)\\b\\s*\\(\\s*[\\dx+yz\\-*/^()\\s]+\\)))+$");
+    // Expresión regular actualizada para validar la ecuación
+    QRegularExpression regex("^\\s*([\\dx+yzepi\\-*/^()\\s]+|(\\b(?:sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|log|log10|log2|pow|sqrt|floor|round|copysign)\\b\\s*\\(\\s*[\\dx+yzepi\\-*/^()\\s]+\\)))+$");
     QRegularExpressionMatch match = regex.match(Ecua);
 
     // Verificar que contenga al menos un número o variable (x, y, z)
-    bool contieneNumero = Ecua.contains(QRegularExpression("[\\dxyz]"));
+    bool contieneNumero = Ecua.contains(QRegularExpression("[\\dxyzepi]"));
 
     if (match.hasMatch() && contieneNumero) {
         try {
@@ -270,7 +300,7 @@ void MainWindow::GuardaEcu() {
         if (Ecua.isEmpty()) {
             QMessageBox::warning(this, "Error", "No ingresó la ecuación.");
         } else {
-            // QMessageBox::warning(this, "Error", "La ecuación ingresada no es válida.");
+            QMessageBox::warning(this, "Error", "La ecuación ingresada no es válida.");
         }
         BarraE->setStyleSheet("QLineEdit {"
                               "border-radius: 10px;"
@@ -425,7 +455,7 @@ void MainWindow::Check(int state){
 
 
 
-// Funcion SLOT boton ejecutar
+
 void MainWindow::Ejecutar() {
     try {
         // Guardar la ecuación y los parámetros necesarios
@@ -460,6 +490,22 @@ void MainWindow::Ejecutar() {
         double t = Guardarm;
         double t_final = GuardarM;
 
+        // Inicializar los valores mínimo y máximo de y
+        double y_min = y[0];
+        double y_max = y[0];
+
+        // Crear los ejes para el gráfico
+        QValueAxis *axisX = new QValueAxis();
+        axisX->setTitleText("t[s]");
+        axisX->setRange(Guardarm + 1.0, GuardarM);  // Rango de tiempo
+
+        QValueAxis *axisY = new QValueAxis();
+        axisY->setTitleText("y");
+        axisY->setRange(y_min, y_max);  // Rango inicial de y, que se ajustará dinámicamente
+
+        // Crear la serie de puntos para el gráfico
+        QLineSeries *series = new QLineSeries();
+
         // Realizar la integración
         while (t < t_final) {
             // Realizar un paso de integración
@@ -468,6 +514,17 @@ void MainWindow::Ejecutar() {
             // Verificar si ocurrió algún error
             if (status != GSL_SUCCESS) {
                 throw std::runtime_error("Error en la integración");
+            }
+
+            // Añadir el punto al gráfico
+            series->append(t, y[0]);
+
+            // Actualizar los valores mínimo y máximo de y
+            if (y[0] < y_min) {
+                y_min = y[0];
+            }
+            if (y[0] > y_max) {
+                y_max = y[0];
             }
 
             // Mostrar el valor de y(t) en este paso de tiempo
@@ -479,6 +536,18 @@ void MainWindow::Ejecutar() {
 
         qDebug() << "Integración terminada";
 
+        // Crear el gráfico y agregar la serie
+        QChart *chart = new QChart();
+        chart->addSeries(series);
+
+        // Establecer los ejes con los valores actualizados
+        axisY->setRange(y_min, y_max);  // Rango actualizado de y
+        chart->setAxisX(axisX, series);
+        chart->setAxisY(axisY, series);
+
+        // Agregar el gráfico a la vista del gráfico
+        chartshow->setChart(chart);
+
     } catch (const std::exception &e) {
         // Mostrar mensaje de error si ocurre alguna excepción
         QMessageBox::critical(this, "Error crítico", QString("Ocurrió un error inesperado: %1").arg(e.what()));
@@ -487,6 +556,7 @@ void MainWindow::Ejecutar() {
         QMessageBox::critical(this, "Error en ecuación", QString("Error al procesar la ecuación: %1").arg(e.GetMsg().c_str()));
     }
 }
+
 
 
 // Funcion SLOT boton Detener
@@ -518,16 +588,29 @@ void MainWindow::ReiniciarTodo() {
 // Datos del glosario (nombre de la función y descripción)
 QMap<QString, QString> crearGlosario() {
     QMap<QString, QString> glossary;
-    glossary["abs"] = "Devuelve el valor absoluto de un número.";
-    glossary["acos"] = "Devuelve el arco coseno de un valor en radianes.";
-    glossary["asin"] = "Devuelve el arco seno de un valor en radianes.";
-    glossary["atan"] = "Devuelve el arco tangente de un valor en radianes.";
-    glossary["cos"] = "Devuelve el coseno de un ángulo (en radianes).";
-    glossary["sin"] = "Devuelve el seno de un ángulo (en radianes).";
-    glossary["tan"] = "Devuelve la tangente de un ángulo (en radianes).";
-    glossary["sqrt"] = "Devuelve la raíz cuadrada de un número.";
-    glossary["log"] = "Devuelve el logaritmo natural (base e) de un número.";
-    glossary["pow"] = "Eleva un número base a una potencia específica.";
+    glossary["sin()"] = "Devuelve el seno de un ángulo (en radianes).";
+    glossary["cos()"] = "Devuelve el coseno de un ángulo (en radianes).";
+    glossary["tan()"] = "Devuelve la tangente de un ángulo (en radianes).";
+    glossary["asin()"] = "Devuelve el arco seno de un valor en radianes.";
+    glossary["acos()"] = "Devuelve el arco coseno de un valor en radianes.";
+    glossary["atan()"] = "Devuelve el arco tangente de un valor en radianes.";
+    glossary["atan2()"] = "Devuelve el arco tangente de dos valores.";
+    glossary["sinh()"] = "Devuelve el seno hiperbólico de un ángulo.";
+    glossary["cosh()"] = "Devuelve el coseno hiperbólico de un ángulo.";
+    glossary["tanh()"] = "Devuelve la tangente hiperbólica de un ángulo.";
+    glossary["asinh()"] = "Devuelve el arco seno hiperbólico de un valor.";
+    glossary["acosh()"] = "Devuelve el arco coseno hiperbólico de un valor.";
+    glossary["atanh()"] = "Devuelve el arco tangente hiperbólica de un valor.";
+    glossary["exp()"] = "Devuelve el valor de e elevado a la potencia de un número.";
+    glossary["log()"] = "Devuelve el logaritmo natural (base e) de un número.";
+    glossary["log10()"] = "Devuelve el logaritmo en base 10 de un número.";
+    glossary["log2()"] = "Devuelve el logaritmo en base 2 de un número.";
+    glossary["pow()"] = "Eleva un número base a una potencia específica.";
+    glossary["sqrt()"] = "Devuelve la raíz cuadrada de un número.";
+    glossary["floor()"] = "Devuelve el entero más cercano menor o igual al número.";
+    glossary["round()"] = "Devuelve el valor redondeado al número entero más cercano.";
+    glossary["pi"] = "El valor de pi, aproximadamente 3.14159.";
+    glossary["e"] = "El valor de la constante e, aproximadamente 2.71828.";
     return glossary;
 }
 
