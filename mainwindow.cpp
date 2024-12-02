@@ -13,7 +13,7 @@ mu::Parser parser;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
-    graf = new Grafico(this);
+    graf = new GraficoWidget(this);
     graf->setGeometry(20, 20, 650, 650); // Usar geometría para establecer posición y tamaño
     // Texto
     Titulo = new QLabel(this);
@@ -262,21 +262,6 @@ void MainWindow::GuardaEcu() {
     }
 }
 
-int EDO(double t, const double y[], double dydt[], void *params) {
-    try {
-        // Configurar las variables del parser
-        parser.DefineVar("t", &t);
-        parser.DefineVar("y", const_cast<double*>(&y[0]));  // muParser necesita un puntero no constante
-
-        // Evaluar la ecuación almacenada en GuardarE
-        dydt[0] = parser.Eval();
-        return GSL_SUCCESS;
-    } catch (mu::Parser::exception_type &e) {
-        qCritical() << "Error en el parser:" << QString::fromStdString(e.GetMsg());
-        return GSL_EBADFUNC;
-    }
-}
-
 // Funciones para validar las variables del minimo y el maximo
 QString MainWindow::Confirmarm(){
     QString m = BarraMin->text();
@@ -409,33 +394,6 @@ void MainWindow::Check(int state){
     }
 }
 
-void MainWindow:: Grafico2D(){
-    // Obtener el rango mínimo y máximo del usuario
-    float minimo = Guardarm;
-    float maximo = GuardarM;
-
-    // Obtener la función ingresada por el usuario
-    float funcion = GuardarE;
-
-    // Establecer el rango en el gráfico
-    graf->setRango(minimo, maximo);
-    void ActualizarG();
-    // Parsear la función y graficarla
-    // Aquí necesitamos hacer un pequeño procesamiento para permitir funciones como 'sin(x)', 'cos(x)', etc.
-    auto evaluarFuncion = [this, funcion](double x) -> double {
-        // Si la función contiene 'sin' o 'cos', evaluamos con la función estándar
-        float func = funcion;
-        func.replace("x", QString::number(x)); // Sustituir 'x' por el valor actual
-        if (func.contains("sin"))
-            return sin(x);  // Por ahora solo soportamos sin(x)
-        else if (func.contains("cos"))
-            return cos(x);  // Y cos(x)
-        else
-            return 0.0;  // Si no se reconoce la función, no hacer nada
-    };
-    graf->setFuncion(evaluarFuncion);  // Establecer la función que el gráfico debe graficar
-    graf->update();  // Actualizar el gráfico
-}
 
 // Funcion SLOT boton ejecutar
 void MainWindow::Ejecutar() {
@@ -450,65 +408,9 @@ void MainWindow::Ejecutar() {
         qDebug() << "Ejecutar() - Configurando subdivisión...";
         GuardarSub();  // Guardar subdivisión si es necesario
 
-        // Configurar el parser con la ecuación ingresada
-        parser.SetExpr(GuardarE.toStdString());  // Convertir QString a std::string
-
-        // Establecer el sistema de ecuaciones a resolver
-        gsl_odeiv2_system sys = {EDO, NULL, 1, NULL};
-
-        // Inicializar el contexto de la integración
-        gsl_odeiv2_driver *driver = gsl_odeiv2_driver_alloc_y_new(
-            &sys,
-            gsl_odeiv2_step_rk8pd,  // Método de Runge-Kutta de 8° orden
-            1e-6,  // Precisión de la integración
-            1e-6,  // Precisión relativa
-            0.0    // Tolerancia absoluta
-            );
-
-        // Inicializar el valor de y (condición inicial)
-        double y[1] = {1.0};  // Ejemplo: valor inicial para y(Guardarm)
-
-        // Establecer el tiempo inicial y final
-        double t = Guardarm;
-        double t_final = GuardarM;
-
-        // Inicializar los valores mínimo y máximo de y
-        double y_min = y[0];
-        double y_max = y[0];
-
-        // Realizar la integración
-        while (t < t_final) {
-            // Realizar un paso de integración
-            int status = gsl_odeiv2_driver_apply(driver, &t, t + 1.0, y);  // Incrementar por 1 segundo
-
-            // Verificar si ocurrió algún error
-            if (status != GSL_SUCCESS) {
-                throw std::runtime_error("Error en la integración");
-            }
-
-            // Actualizar los valores mínimo y máximo de y
-            if (y[0] < y_min) {
-                y_min = y[0];
-            }
-            if (y[0] > y_max) {
-                y_max = y[0];
-            }
-
-            // Mostrar el valor de y(t) en este paso de tiempo
-            qDebug() << "Tiempo: " << t << " Valor de y: " << y[0];
-        }
-
-        // Liberar el contexto del driver después de la integración
-        gsl_odeiv2_driver_free(driver);
-
-        qDebug() << "Integración terminada";
-
     } catch (const std::exception &e) {
         // Mostrar mensaje de error si ocurre alguna excepción
         QMessageBox::critical(this, "Error crítico", QString("Ocurrió un error inesperado: %1").arg(e.what()));
-    } catch (mu::Parser::exception_type &e) {
-        // Mostrar mensaje de error específico del parser
-        QMessageBox::critical(this, "Error en ecuación", QString("Error al procesar la ecuación: %1").arg(e.GetMsg().c_str()));
     }
 }
 
