@@ -210,10 +210,10 @@ void MainWindow::BAMm(){
     QMessageBox::information(this, " ", "Esto indica el rango de evaluación de t[s].");
 }
 void MainWindow::BAS(){
-    QMessageBox::information(this, " ", "Divide las lineas????");
+    QMessageBox::information(this, " ", "Salto de valores en los ejes");
 }
 void MainWindow::BAZ(){
-    QMessageBox::information(this, " ", "Si el check esta activado, este mostrara un grafico con trs ejes, ose que sera de tres dimenciones. En cambio, si esta desactivado, el grafico solo mostrara dos eje, siendo asi de dos dimensiones");
+    QMessageBox::information(this, " ", "Si el check esta activado, este mostrara un grafico con tres ejes, ose que sera de tres dimenciones. En cambio, si esta desactivado, el grafico solo mostrara dos eje, siendo asi de dos dimensiones");
 }
 
 
