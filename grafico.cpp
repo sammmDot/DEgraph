@@ -18,20 +18,21 @@ void GraficoWidget::initializeGL() {
     performIntegration(); // Realizar integración al iniciar
 }
 
-// Ajusta el tamaño del viewport
+// Ajusta el tamaño del viewport y define la proyección
 void GraficoWidget::resizeGL(int w, int h) {
     glViewport(0, 0, w, h);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-0.5, 10.5, -0.1, 1.1); // Configuración de las coordenadas
+    glOrtho(-1.0, 11.0, -0.2, 1.2, -1.0, 1.0); // Ampliar un poco los márgenes
 }
 
 // Dibuja el contenido del widget
 void GraficoWidget::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    drawAxesWithLabels();    // Dibujar ejes
+    drawGrid();              // Dibujar cuadrícula
+    drawAxesWithLabels();    // Dibujar ejes y etiquetas
     renderIntegrationPoints(); // Dibujar puntos
 }
 
@@ -65,44 +66,73 @@ void GraficoWidget::performIntegration() {
 
 // Dibuja los ejes y sus etiquetas
 void GraficoWidget::drawAxesWithLabels() {
+    glColor3f(0.0f, 0.0f, 0.0f); // Negro para los ejes
+    glLineWidth(2.0f);
+
+    // Dibujar ejes X y Y
     glBegin(GL_LINES);
-
-    // Eje X
-    glColor3f(0.0f, 0.0f, 0.0f); // Negro
-    glVertex2f(-0.1f, 0.0f);
-    glVertex2f(10.5f, 0.0f);
-
-    // Eje Y
-    glVertex2f(0.0f, -0.1f);
-    glVertex2f(0.0f, 1.1f);
-
+    glVertex2f(0.0f, -0.1f); glVertex2f(0.0f, 1.1f); // Eje Y
+    glVertex2f(-0.5f, 0.0f); glVertex2f(10.5f, 0.0f); // Eje X
     glEnd();
 
-    // Dibujar etiquetas
+    // Usar QPainter para etiquetas
     QPainter painter(this);
     painter.setPen(Qt::black);
+    painter.setFont(QFont("Arial", 10));
 
     // Etiquetas del eje X
     for (int i = 0; i <= 10; ++i) {
         QString label = QString::number(i);
-        painter.drawText(QPointF(i * width() / 10.0, height() / 2.0 - 10), label);
+        QPointF pos = mapToWidgetCoords(i, -0.05f);
+        painter.drawText(pos, label);
     }
 
     // Etiquetas del eje Y
     for (int i = 0; i <= 10; ++i) {
         QString label = QString::number(i / 10.0, 'f', 1);
-        painter.drawText(QPointF(width() / 2.0 - 30, height() - i * height() / 10.0), label);
+        QPointF pos = mapToWidgetCoords(-0.3f, i / 10.0f);
+        painter.drawText(pos, label);
     }
+}
+
+// Dibuja la cuadrícula
+void GraficoWidget::drawGrid() {
+    glColor3f(0.9f, 0.9f, 0.9f); // Gris claro para la cuadrícula
+    glLineWidth(1.0f);
+
+    glBegin(GL_LINES);
+
+    // Líneas verticales (X)
+    for (int i = 0; i <= 10; ++i) {
+        glVertex2f(i, -0.1f);
+        glVertex2f(i, 1.1f);
+    }
+
+    // Líneas horizontales (Y)
+    for (int i = 0; i <= 10; ++i) {
+        float y = i / 10.0f;
+        glVertex2f(-0.5f, y);
+        glVertex2f(10.5f, y);
+    }
+
+    glEnd();
 }
 
 // Dibuja los puntos de integración
 void GraficoWidget::renderIntegrationPoints() {
     glColor3f(0.0f, 0.0f, 1.0f); // Azul para los puntos
-    glPointSize(4.0f);
+    glPointSize(5.0f);
 
     glBegin(GL_POINTS);
     for (const auto& point : integrationPoints) {
         glVertex2f(point.x, point.y);
     }
     glEnd();
+}
+
+// Convierte coordenadas del gráfico a coordenadas del widget
+QPointF GraficoWidget::mapToWidgetCoords(float x, float y) {
+    float widgetX = (x + 0.5f) * width() / 11.0f;
+    float widgetY = height() - (y + 0.1f) * height() / 1.3f;
+    return QPointF(widgetX, widgetY);
 }
