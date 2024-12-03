@@ -13,33 +13,34 @@ mu::Parser parser;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
+
     graf = new GraficoWidget(this);
-    graf->setGeometry(20, 20, 650, 650); // Usar geometría para establecer posición y tamaño
+    graf->setGeometry(20, 20, 1000, 720); // Usar geometría para establecer posición y tamaño
     // Texto
     Titulo = new QLabel(this);
     QPixmap pixmap(":/logo/Logo.png");// Cargar la imagen desde un archivo
     Titulo->setPixmap(pixmap);
     Titulo->setPixmap(pixmap.scaled(300, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation));  // Ajustar imagen al QLabel
-    Titulo->setGeometry(675, 40, 500, 150); // Usar geometría para establecer posición y tamaño
+    Titulo->setGeometry(1050, 40, 500, 150); // Usar geometría para establecer posición y tamaño
 
     tituloE = new QLabel("Ingrese la ecuacion:", this);
-    tituloE->setGeometry(700, 180, 200, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloE->setGeometry(1080, 180, 200, 20); // Posición (x, y) y tamaño ancho x alto
     tituloE->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloMin = new QLabel("Minimo:", this);
-    tituloMin->setGeometry(700, 280, 100, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloMin->setGeometry(1080, 280, 100, 20); // Posición (x, y) y tamaño ancho x alto
     tituloMin->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;");
 
     tituloMax = new QLabel("Maximo:", this);
-    tituloMax->setGeometry(850, 280, 100, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloMax->setGeometry(1220, 280, 100, 20); // Posición (x, y) y tamaño ancho x alto
     tituloMax->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloS = new QLabel("Subdivision:", this);
-    tituloS->setGeometry(700, 380, 250, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloS->setGeometry(1080, 380, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloS->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     tituloC = new QLabel("Eje z", this);
-    tituloC->setGeometry(734, 505, 250, 20); // Posición (x, y) y tamaño ancho x alto
+    tituloC->setGeometry(1115, 505, 250, 20); // Posición (x, y) y tamaño ancho x alto
     tituloC->setStyleSheet("font-size: 12px; font-weight: bold; color: #333;"); // Caracteristicas generales
 
     // Botones ayuda
@@ -48,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAE->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
                            "QPushButton:hover {""background-color: #c0c0c0;""}"
                            "QPushButton:pressed {""background-color: #c0c0c0;""}");
-    BotonAE->setGeometry(910, 205, 18, 18);  // Ubicacion
+    BotonAE->setGeometry(1290, 205, 18, 18);  // Ubicacion
     // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
     connect(BotonAE, &QPushButton::clicked, this, &MainWindow::BAE);
 
@@ -57,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAMm->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
                             "QPushButton:hover {""background-color: #c0c0c0;""}"
                             "QPushButton:pressed {""background-color: #c0c0c0;""}");
-    BotonAMm->setGeometry(815, 305, 18, 18);  // Ubicacion
+    BotonAMm->setGeometry(1190, 305, 18, 18);  // Ubicacion
     // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
     connect(BotonAMm, &QPushButton::clicked, this, &MainWindow::BAMm);
 
@@ -66,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAS->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
                            "QPushButton:hover {""background-color: #c0c0c0;""}"
                            "QPushButton:pressed {""background-color: #c0c0c0;""}");
-    BotonAS->setGeometry(910, 405, 18, 18);  // Ubicacion
+    BotonAS->setGeometry(1290, 405, 18, 18);  // Ubicacion
     // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
     connect(BotonAS, &QPushButton::clicked, this, &MainWindow::BAS);
 
@@ -75,9 +76,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     BotonAZ->setStyleSheet("QPushButton {""border-radius: 7px;""background-color: #d3d3d3;""font-weight: bold;""color: #2c2c2c;""}"
                            "QPushButton:hover {""background-color: #c0c0c0;""}"
                            "QPushButton:pressed {""background-color: #c0c0c0;""}");
-    BotonAZ->setGeometry(770, 505, 18, 18);  // Ubicacion
+    BotonAZ->setGeometry(1145, 505, 18, 18);  // Ubicacion
+
     // Conectar el clic del botón al slot, aparece una ventana emergente con na pequeña descripcion
     connect(BotonAZ, &QPushButton::clicked, this, &MainWindow::BAZ);
+
     // Funcion para barra de ecuaciones
     Autocompletar();
 
@@ -89,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                             "padding: 5px;"
                             "background-color: #b4ddd8;"
                             "}");
-    BarraMin->setGeometry(700, 300, 100, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraMin->setGeometry(1080, 300, 100, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
 
 
     // Imput maximo
@@ -100,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                             "padding: 5px;"
                             "background-color: #b4ddd8;"
                             "}");
-    BarraMax->setGeometry(850, 300, 100, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraMax->setGeometry(1220, 300, 100, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
 
     // Imput subdivision
     BarraS = new QLineEdit(this);              // Crea la barra de texto
@@ -110,11 +113,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                           "padding: 5px;"
                           "background-color: #b4ddd8;"
                           "}");
-    BarraS->setGeometry(700, 400, 200, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraS->setGeometry(1080, 400, 200, 30);    // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
 
     // Boton check
     BotonC = new QCheckBox(this);
-    BotonC->setGeometry(710, 500, 15, 30); // Posición y tamaño de check
+    BotonC->setGeometry(1090, 500, 15, 30); // Posición y tamaño de check
     connect(BotonC, &QCheckBox::stateChanged, this, &MainWindow::Check);  //conecta el boton con una condicion
 
     // Boton ejecutar
@@ -124,7 +127,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                            "QPushButton:hover {""background-color: #8aeb81;""}"
                            "QPushButton:pressed {""background-color: #8aeb81;""}"
                            );
-    BotonEj->setGeometry(700, 600, 100, 50);  // Ubicacion
+    BotonEj->setGeometry(1080, 600, 100, 50);  // Ubicacion
     connect(BotonEj, &QPushButton::clicked, this, &MainWindow::Ejecutar);  // Conectar el clic del botón al slot Ejecutar
 
     // Boton detener
@@ -134,13 +137,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                              "QPushButton:hover {""background-color: #ed8c9f;""}"
                              "QPushButton:pressed {""background-color: #ed8c9f;""}"
                              );
-    BotonAlto->setGeometry(850, 600, 100, 50);  // Ubicacion
+    BotonAlto->setGeometry(1230, 600, 100, 50);  // Ubicacion
 
     connect(BotonAlto, &QPushButton::clicked, this, &MainWindow::ReiniciarTodo);  // Conectar el clic del botón al slot ReiniciarTodo
 
     // Boton glosario
     BotonGlo = new QPushButton(this);
-        // Caracteristicas del boton
+    // Caracteristicas del boton
     BotonGlo->setStyleSheet("QPushButton {"
                             "border-radius: 10px; "
                             "icon-size: 50px 50px;"                     // Tamaño del ícono
@@ -156,7 +159,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
                             "qproperty-icon: url(:/botones/boton_pres.png);"  // Imagen en hover
                             "}"
                             );
-    BotonGlo->setGeometry(870, 485, 60, 60);  // Ubicacion
+    BotonGlo->setGeometry(1255, 485, 60, 60);  // Ubicacion
     connect(BotonGlo, &QPushButton::clicked, this, &MainWindow::Glosario);   // Conectar el clic del botón al slot Glosario, abiendo otra vetana
 }
 
@@ -200,7 +203,7 @@ void MainWindow::Autocompletar()
                           "padding: 5px;"
                           "background-color: #b4ddd8;"
                           "}");
-    BarraE->setGeometry(700, 200, 200, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
+    BarraE->setGeometry(1080, 200, 200, 30);   // Los dos primeros lo ubican en el plano, el tercero es el largo y el ultimo el ancho de la barra
     BarraE->setCompleter(completar);
 }
 
